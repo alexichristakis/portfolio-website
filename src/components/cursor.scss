@@ -4,10 +4,6 @@
     top: 0;
     left: 0;
 
-    &.locked {
-      transition: transform 100ms ease-out;
-    }
-
     &,
     .cursor__content {
       position: absolute;
@@ -22,6 +18,11 @@
       left: 0;
       right: 0;
       top: 0;
+    }
+
+    &.locked {
+      transition: transform 100ms ease-out;
+      border-radius: 10%;
     }
   }
 }

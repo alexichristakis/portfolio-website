@@ -3,6 +3,7 @@ export {
   FocusedProjectProvider,
 } from "./FocusedProject";
 export { CursorStateProvider, CursorStateContext } from "./CursorState";
+export { WindowManagerProvider, WindowManagerContext } from "./WindowManager";
 
 // Types
 export type {
@@ -10,3 +11,4 @@ export type {
   CursorEventListener,
   CursorEventListenerCallback,
 } from "./CursorState";
+export type { WindowConfig } from "./WindowManager";

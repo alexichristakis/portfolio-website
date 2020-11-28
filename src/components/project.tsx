@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useLockedCursor } from "../hooks";
 import { Project as ProjectType } from "../types";
 import { ICON_ZINDEX } from "../lib";
-import { WindowManagerContext } from "./windowManager";
+import { WindowManagerContext } from "../context";
 import "./project.scss";
 
 const ClassPrefix = "project";
@@ -23,26 +23,27 @@ export const Project: React.FC<ProjectType> = ({ title }) => {
     },
   });
 
-  const handleOnTap = () =>
+  const handleOnClick = () =>
     spawnWindow({
-      id: "1",
+      id: title,
+      title,
       sourceRef: iconRef,
-      content: () => <div>hello!</div>,
+      content: <div>{title}</div>,
     });
 
   return (
     <div className={`${ClassPrefix}`}>
       <motion.div
+        ref={iconRef}
         className={`${ClassPrefix}__icon-container`}
-        onTap={handleOnTap}
+        onClick={handleOnClick}
         style={style}
       >
         <motion.div
-          ref={iconRef}
           className={`${ClassPrefix}__icon`}
-          whileHover={{ scale: PROJECT_SCALE_FACTOR }}
-          whileTap={{ scale: PROJECT_SCALE_FACTOR - 0.1, opacity: 0.9 }}
-        ></motion.div>
+          // whileHover={{ scale: PROJECT_SCALE_FACTOR }}
+          // whileTap={{ scale: PROJECT_SCALE_FACTOR - 0.1, opacity: 0.9 }}
+        />
       </motion.div>
       <div className={`${ClassPrefix}__title`}>{title}</div>
     </div>

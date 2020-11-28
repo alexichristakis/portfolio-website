@@ -1,21 +1,19 @@
 import React from "react";
 
-import { FocusedProjectProvider, CursorStateProvider } from "./context";
-import { Projects, Cursor, WindowManager } from "./components";
+import { WindowManagerProvider, CursorStateProvider } from "./context";
+import { Projects, Cursor } from "./components";
 
 import "./App.scss";
 
 const App: React.FC = () => (
-  <FocusedProjectProvider>
-    <CursorStateProvider>
-      <div className="app-container">
-        <WindowManager>
-          <Projects />
-        </WindowManager>
-      </div>
-      <Cursor />
-    </CursorStateProvider>
-  </FocusedProjectProvider>
+  <CursorStateProvider>
+    <div className="app-container">
+      <WindowManagerProvider>
+        <Projects />
+      </WindowManagerProvider>
+    </div>
+    <Cursor />
+  </CursorStateProvider>
 );
 
 export default App;

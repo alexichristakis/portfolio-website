@@ -13,7 +13,7 @@ type UseLockedCursorHandlers = {
 export const useLockedCursor = (
   ref: React.RefObject<HTMLElement>,
   config: {
-    zIndex: number;
+    zIndex?: number;
     scale?: number;
     handlers?: UseLockedCursorHandlers;
   }
@@ -21,6 +21,7 @@ export const useLockedCursor = (
   const { handlers } = config;
   const isLocked = useToggle(false);
   const zIndex = useMotionValue(0);
+  const scale = useSpring(1);
   const { position, lockedRect, lock, unlock } = useContext(CursorStateContext);
 
   const xOffset = useTransform(position.x, (x) => {
@@ -51,7 +52,8 @@ export const useLockedCursor = (
     isLocked.setTrue();
     const rect = ref.current?.getBoundingClientRect();
     if (rect) lock(rect, config.scale, config.zIndex);
-    zIndex.set(config.zIndex);
+    if (config.zIndex) zIndex.set(config.zIndex);
+    if (config.scale) scale.set(config.scale);
     handlers?.onMouseEnter?.(ev);
   }, []);
 
@@ -59,6 +61,7 @@ export const useLockedCursor = (
     isLocked.setFalse();
     unlock();
 
+    scale.set(1);
     zIndex.set(0);
     handlers?.onMouseLeave?.(ev);
   }, []);
@@ -79,16 +82,17 @@ export const useLockedCursor = (
     };
   }, []);
 
-  const transform = useTranslate({
-    x: useSpring(xOffset),
-    y: useSpring(yOffset),
-  });
+  // const transform = useTranslate({
+  //   x: useSpring(xOffset),
+  //   y: useSpring(yOffset),
+  // });
 
   return {
     cursorPosition: position,
     isLocked: isLocked.value,
     style: {
-      transform,
+      // transform,
+      scale,
       zIndex,
     },
   };
