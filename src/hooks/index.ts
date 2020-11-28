@@ -1,3 +1,4 @@
-export { useCursorState } from "./useCursorState";
-export { useLockedCursor, LockedElementStyle } from "./useLockedCursor";
+export { useLockedCursor } from "./useLockedCursor";
+export { useToggle } from "./useToggle";
+export { useTranslate } from "./useTranslate";
 export { useCursorEvents } from "./useCursorEvents";

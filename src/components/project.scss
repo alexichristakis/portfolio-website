@@ -1,0 +1,23 @@
+.project {
+  margin: 40px;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+
+  &__icon-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  &__icon {
+    border-radius: 10px;
+    width: 100%;
+    height: 100%;
+    background-color: rebeccapurple;
+  }
+
+  &__title {
+  }
+}

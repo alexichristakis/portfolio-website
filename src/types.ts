@@ -1,4 +1,4 @@
 export type Project = {
   title: string;
-  color: string;
+  color?: string;
 };

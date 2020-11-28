@@ -1,0 +1,60 @@
+.window-manager {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.window {
+  position: absolute;
+  background-color: aliceblue;
+  border-radius: 5px;
+  box-shadow: 0 0 2px 0px #707070;
+  overflow: hidden;
+  pointer-events: all;
+  //   transform-origin: top left;
+
+  &__header {
+    display: flex;
+    flex-direction: row;
+    top: 0;
+  }
+
+  &__container {
+    pointer-events: none;
+    transform-origin: top left;
+  }
+
+  &__content {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+  }
+}
+
+.draggable-corner {
+  display: flex;
+  position: absolute;
+  &-0 {
+    left: 0;
+    top: 0;
+  }
+
+  &-1 {
+    top: 0;
+    right: 0;
+  }
+
+  &-2 {
+    right: 0;
+    bottom: 0;
+  }
+
+  &-3 {
+    bottom: 0;
+    left: 0;
+  }
+}

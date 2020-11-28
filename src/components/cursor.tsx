@@ -1,135 +1,84 @@
-import React, { useRef } from "react";
-import styled from "styled-components";
-
+import { useRef } from "react";
 import {
-  setStyleProperties,
-  DEFAULT_CURSOR_SIZE,
-  LOCKED_CURSOR_BUFFER,
-} from "../lib";
+  animate,
+  motion,
+  Tween,
+  useMotionTemplate,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
+
 import { useCursorEvents } from "../hooks";
+import { CURSOR_ZINDEX } from "../lib";
+import "./cursor.scss";
 
-const CursorContent = styled.div``;
-
-const StyledCursor = styled.div`
-  pointer-events: none;
-  transform: translate(-50%, -50%) scale(var(--scale));
-  transition-property: width, height;
-  width: var(--width);
-  height: var(--height);
-  left: var(--left);
-  top: var(--top);
-
-  --top: -${DEFAULT_CURSOR_SIZE}px;
-  --left: -${DEFAULT_CURSOR_SIZE}px;
-  --width: ${DEFAULT_CURSOR_SIZE}px;
-  --height: ${DEFAULT_CURSOR_SIZE}px;
-  --scale: 1;
-  --translateX: 0;
-  --translateY: 0;
-
-  &,
-  ${CursorContent} {
-    position: absolute;
-    transition-duration: 250ms;
-    transition-timing-function: ease-out;
-  }
-
-  ${CursorContent} {
-    background-color: #000;
-    border-radius: 0.6em;
-    bottom: 0;
-    left: 0;
-    opacity: 0.3;
-    right: 0;
-    top: 0;
-    opacity: 0.3;
-    transform: translate(var(--translateX), var(--translateY));
-    transition-property: opacity;
-  }
-
-  &.locked {
-    transition-property: width, height, left, top;
-    ${CursorContent} {
-      background-color: transparent;
-      border: solid #000 5px;
-      opacity: 0.06;
-    }
-  }
-`;
+const ClassPrefix = "cursor";
 
 export const Cursor: React.FC = () => {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const unlockTimeout = useRef<number | undefined>(undefined);
+  const cursorWidth = useMotionValue(10);
+  const cursorHeight = useMotionValue(10);
 
-  useCursorEvents({
-    onMove: (payload) => {
-      const { x, y } = payload.position;
+  const transitionConfig: Tween = {
+    type: "tween",
+    ease: "circOut",
+    duration: 0.2,
+  };
 
-      if (!payload.isLocked) {
-        requestAnimationFrame(() => {
-          setStyleProperties(cursorRef.current, {
-            "--top": `${y}px`,
-            "--left": `${x}px`,
-          });
-        });
-      } else {
-        const { rect, target } = payload;
-        const { height, top, width, left } = rect;
+  const { cursorRef, position, zIndex, isLocked, lockedRect } = useCursorEvents(
+    {
+      onLock: ({ rect, scaleFactor }) => {
+        if (rect) {
+          const { width, height } = rect;
+          const scale = scaleFactor ? scaleFactor + 0.1 : 1;
+          animate(cursorWidth, width * scale, transitionConfig);
+          animate(cursorHeight, height * scale, transitionConfig);
+        }
+      },
+      onUnlock: ({ rect }) => {
+        animate(cursorWidth, 10, transitionConfig);
+        animate(cursorHeight, 10, transitionConfig);
+      },
+    }
+  );
 
-        const halfHeight = height / 2;
-        const topOffset = (y - top - halfHeight) / halfHeight;
+  const { x, y } = position;
+  const translateX = useTransform(x, (x) => {
+    if (lockedRect.current && isLocked) {
+      const { left, width } = lockedRect.current;
 
-        const halfWidth = width / 2;
-        const leftOffset = (x - left - halfWidth) / halfWidth;
+      const halfWidth = width / 2;
+      const leftOffset = (x - left - halfWidth) / halfWidth;
 
-        requestAnimationFrame(() => {
-          setStyleProperties(cursorRef.current, {
-            "--translateX": `${leftOffset * 3}px`,
-            "--translateY": `${topOffset * 3}px`,
-          });
-
-          setStyleProperties(target, {
-            "--translateX": `${leftOffset * 6}px`,
-            "--translateY": `${topOffset * 4}px`,
-          });
-        });
-      }
-    },
-    onLock: (payload) => {
-      const { rect } = payload;
-      const { top, left, height, width } = rect;
-
-      clearTimeout(unlockTimeout.current);
-
-      requestAnimationFrame(() => {
-        cursorRef.current?.classList.add("locked");
-        setStyleProperties(cursorRef.current, {
-          "--top": `${top + height / 2}px`,
-          "--left": `${left + width / 2}px`,
-          "--width": `${width + 2 * LOCKED_CURSOR_BUFFER}px`,
-          "--height": `${height + 2 * LOCKED_CURSOR_BUFFER}px`,
-        });
-      });
-    },
-    onUnlock: () => {
-      unlockTimeout.current = setTimeout(() => {
-        cursorRef.current?.classList.remove("locked");
-      }, 250);
-
-      requestAnimationFrame(() => {
-        setStyleProperties(cursorRef.current, {
-          "--width": `${DEFAULT_CURSOR_SIZE}px`,
-          "--height": `${DEFAULT_CURSOR_SIZE}px`,
-          "--translateX": "0",
-          "--translateY": "0",
-        });
-      });
-    },
+      return left + halfWidth + leftOffset * 4;
+    }
+    return x;
   });
 
+  const translateY = useTransform(y, (y) => {
+    if (lockedRect.current && isLocked) {
+      const { top, height } = lockedRect.current;
+
+      const halfHeight = height / 2;
+      const topOffset = (y - top - halfHeight) / halfHeight;
+
+      return top + halfHeight + topOffset * 4;
+    }
+    return y;
+  });
+
+  const transform = useMotionTemplate`translate(${translateX}px, ${translateY}px)`;
   return (
-    <StyledCursor ref={cursorRef}>
-      <CursorContent />
-    </StyledCursor>
+    <motion.div
+      ref={cursorRef}
+      className={`${ClassPrefix}__container`}
+      style={{
+        width: cursorWidth,
+        height: cursorHeight,
+        transform,
+        zIndex,
+      }}
+    >
+      <motion.div className={`${ClassPrefix}__content`} />
+    </motion.div>
   );
 };
