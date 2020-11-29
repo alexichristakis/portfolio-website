@@ -16,76 +16,97 @@ export type WindowEventHandlers = {
 };
 
 type WindowManagerState = {
-  spawnWindow: (newWindow: WindowConfig) => void;
-  destroyWindow: (id: string) => void;
-  registerWindow: (id: string, ref: React.RefObject<HTMLElement>) => void;
-  windows: WindowConfig[];
-  openWindows: string[];
   events: Subject<WindowManagerEventPayload>;
+  getWindowState: (id: string) => WindowState;
+  registerWindow: (window: WindowConfig) => void;
+  openWindow: (id: string) => void;
+  closeWindow: (id: string) => void;
 };
 
-export type WindowEventType = "SPAWN" | "REQUEST_CLOSE" | "DESTROY";
 type WindowManagerEventPayload = {
-  type: WindowEventType;
+  type: WindowState;
   id: string;
 };
 
 export const WindowManagerContext = createContext({} as WindowManagerState);
 
+export enum WindowState {
+  OPEN,
+  CLOSING,
+  CLOSED,
+}
+
+type WindowMap = {
+  [id: string]: WindowConfig & { state: WindowState };
+};
+
 export const WindowManagerProvider: React.FC = ({ children }) => {
-  const [windows, setWindows] = useState<WindowConfig[]>([]);
+  const registeredWindows = useRef<WindowMap>({});
   const [openWindows, setOpenWindows] = useState<string[]>([]);
-  const sourceRefs = useRef<{
-    [id: string]: React.RefObject<HTMLElement>;
-  }>({});
   const events = useMemo(() => new Subject<WindowManagerEventPayload>(), []);
 
-  const registerWindow = useCallback(
-    (id: string, ref: React.RefObject<HTMLElement>) => {
-      console.log("register window", id, ref);
-      sourceRefs.current[id] = ref;
-    },
+  const registerWindow = useCallback((window: WindowConfig) => {
+    if (!registeredWindows.current[window.id]) {
+      registeredWindows.current[window.id] = {
+        ...window,
+        state: WindowState.CLOSED,
+      };
+    }
+  }, []);
+
+  const handleWindowOpen = useCallback((id: string) => {
+    events.next({ id, type: WindowState.OPEN });
+    registeredWindows.current[id].state = WindowState.OPEN;
+    setOpenWindows((prev) => [...prev, id]);
+  }, []);
+
+  const openWindow = useCallback((id: string) => {
+    const window = registeredWindows.current[id];
+    if (window) {
+      const { state } = window;
+      if (state !== WindowState.OPEN) {
+        handleWindowOpen(id);
+      }
+    }
+  }, []);
+
+  const requestClose = useCallback((id: string) => {
+    events.next({ id, type: WindowState.CLOSING });
+    registeredWindows.current[id].state = WindowState.CLOSING;
+  }, []);
+
+  const closeWindow = useCallback((id: string) => {
+    events.next({ id, type: WindowState.CLOSED });
+    registeredWindows.current[id].state = WindowState.CLOSED;
+    setOpenWindows((prev) => prev.filter((window) => window !== id));
+  }, []);
+
+  const getWindowState = useCallback(
+    (id: string) => registeredWindows.current[id]?.state ?? WindowState.CLOSED,
     []
   );
 
-  const spawnWindow = useCallback((newWindow: WindowConfig) => {
-    events.next({ type: "SPAWN", id: newWindow.id });
-    setWindows((prev) => [...prev, newWindow]);
-    setOpenWindows((prev) => [...prev, newWindow.id]);
-  }, []);
-
-  const requestClose = useCallback((idToClose: string) => {
-    setOpenWindows((prev) => prev.filter((id) => id !== idToClose));
-    events.next({ type: "REQUEST_CLOSE", id: idToClose });
-  }, []);
-
-  const destroyWindow = useCallback((id: string) => {
-    events.next({ type: "DESTROY", id });
-    setWindows((prev) => prev.filter((window) => window.id !== id));
-  }, []);
-
-  // expose to context the controls to spawn, destroy, and subscribe
-  // to window events
-  const state = {
-    windows,
-    openWindows,
-    events,
-    spawnWindow,
-    destroyWindow,
-    registerWindow,
-  };
+  const state = useMemo(
+    () => ({
+      events,
+      getWindowState,
+      openWindow,
+      closeWindow,
+      registerWindow,
+    }),
+    []
+  );
 
   return (
     <WindowManagerContext.Provider value={state}>
       {children}
       <div className="absolute-fill pointer-none">
-        {windows.map((window) => (
+        {openWindows.map((id) => (
           <Window
-            key={window.id}
-            sourceRefs={sourceRefs}
-            onRequestClose={() => requestClose(window.id)}
-            destroyWindow={() => destroyWindow(window.id)}
-            {...window}
+            key={id}
+            onRequestClose={() => requestClose(id)}
+            destroyWindow={() => closeWindow(id)}
+            {...registeredWindows.current[id]}
           />
         ))}
       </div>

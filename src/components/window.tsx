@@ -24,9 +24,6 @@ enum Direction {
 interface WindowProps extends WindowConfig {
   onRequestClose: () => void;
   destroyWindow: () => void;
-  sourceRefs: React.RefObject<{
-    [id: string]: React.RefObject<HTMLElement>;
-  }>;
 }
 
 interface DraggableCornerProps {
@@ -74,8 +71,6 @@ export const Window: React.FC<WindowProps> = ({
   onRequestClose,
   destroyWindow,
   sourceRef,
-  sourceRefs,
-  id,
   content,
   title,
   icon,
@@ -88,8 +83,9 @@ export const Window: React.FC<WindowProps> = ({
 
   const sourceRect = useMemo(
     () => sourceRef.current?.getBoundingClientRect()!,
-    [sourceRef]
+    []
   );
+
   const offsetX = useMotionValue(sourceRect.left);
   const offsetY = useMotionValue(sourceRect.top);
   const scaleX = useMotionValue(sourceRect.width / WINDOW_WIDTH);
@@ -161,23 +157,17 @@ export const Window: React.FC<WindowProps> = ({
   const handleOnClickClose = useCallback(() => {
     onRequestClose();
     requestAnimationFrame(() => {
-      const sourceRect = sourceRefs.current?.[
-        id
-      ].current?.getBoundingClientRect();
-
-      // const sourceRect = sourceRef.current?.getBoundingClientRect();
-      console.log(sourceRef, sourceRect);
-      if (sourceRect) {
-        const scaleXDest = sourceRect.width / width.get();
-        const scaleYDest = sourceRect.height / height.get();
+      const destRect = sourceRef.current?.getBoundingClientRect();
+      if (destRect) {
+        const scaleXDest = destRect.width / width.get();
+        const scaleYDest = destRect.height / height.get();
 
         animate(animation, 0);
-        animate(offsetX, sourceRect.left, transitionConfig);
-        animate(offsetY, sourceRect.top, transitionConfig);
+        animate(offsetX, destRect.left, transitionConfig);
+        animate(offsetY, destRect.top, transitionConfig);
         animate(scaleX, scaleXDest, transitionConfig);
         animate(scaleY, scaleYDest, transitionConfig);
       }
-
       setTimeout(destroyWindow, transitionConfig.duration * 1000);
     });
   }, []);

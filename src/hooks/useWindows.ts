@@ -1,68 +1,35 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
-import {
-  WindowConfig,
-  WindowManagerContext,
-  WindowEventType,
-  WindowEventHandlers,
-} from "../context";
-import { useWindowEvents } from "./useWindowEvents";
+import { WindowConfig, WindowManagerContext, WindowState } from "../context";
 
 export type UseWindowConfig = {
-  window?: WindowConfig;
-  handlers?: WindowEventHandlers;
+  window: Omit<WindowConfig, "sourceRef">;
 };
 
-export const useWindows = ({ window, handlers }: UseWindowConfig) => {
-  const [state, setState] = useState<WindowEventType>("DESTROY");
-  const { spawnWindow, registerWindow, events } = useContext(
+export const useWindows = ({ window }: UseWindowConfig) => {
+  const sourceRef = useRef<HTMLDivElement>(null);
+  const [windowState, setWindowState] = useState(WindowState.CLOSED);
+  const { openWindow, registerWindow, events } = useContext(
     WindowManagerContext
   );
 
   useEffect(() => {
+    registerWindow({ ...window, sourceRef });
+
     const subscription = events.subscribe((payload) => {
       const { type, id } = payload;
 
-      if (!window?.id || id === window?.id) {
-        setState(type);
-        if (type === "REQUEST_CLOSE") {
-          handlers?.onRequestClose?.();
-        }
-
-        if (type === "DESTROY") {
-          handlers?.onClose?.();
-        }
-
-        if (type === "SPAWN") {
-          handlers?.onSpawn?.();
-        }
+      if (id === window.id) {
+        setWindowState(type);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (window) registerWindow(window.id, window.sourceRef);
-  }, [window]);
-
-  //   const { isOpen, isClosed, isClosing } = useWindowEvents({
-  //     id: window.id,
-  //     handlers,
-  //   });
-
-  const handleSpawnWindow = () => {
-    if (window) spawnWindow(window);
-  };
-
   return {
-    spawnWindow: handleSpawnWindow,
-    state,
-    isOpen: state === "SPAWN",
-    isClosed: state === "DESTROY",
-    // isOpen: windows.findIndex(({ title }) => window.id === title) > -1,
-    // isOpen,
-    // isClosed,
-    // isClosing,
+    openWindow: () => openWindow(window.id),
+    sourceRef,
+    windowState,
   };
 };
