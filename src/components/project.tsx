@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { memo, useContext, useRef } from "react";
 import { motion } from "framer-motion";
 
 import { useLockedCursor, useWindows } from "../hooks";
@@ -10,52 +10,46 @@ const ClassPrefix = "project";
 
 const PROJECT_SCALE_FACTOR = 1.5;
 
-export const Project: React.FC<ProjectType> = ({ title, content, icon }) => {
-  const iconRef = useRef<HTMLDivElement>(null);
+export const Project: React.FC<ProjectType> = memo(
+  ({ title, content, icon }) => {
+    const ref = useRef<HTMLDivElement>(null);
 
-  const { spawnWindow, windowState } = useWindows({
-    window: {
-      id: title,
-      icon,
-      title,
-      content,
-      sourceRef: iconRef,
-    },
-  });
+    const { spawnWindow, isOpen, isClosed } = useWindows({
+      window: {
+        id: title,
+        icon,
+        title,
+        content,
+        sourceRef: ref,
+      },
+    });
+    console.log("renderproject", title, isOpen, isClosed);
 
-  const { style } = useLockedCursor(iconRef, {
-    zIndex: ICON_ZINDEX,
-    scale: PROJECT_SCALE_FACTOR,
-  });
+    // const { style } = useLockedCursor(ref, {
+    //   zIndex: ICON_ZINDEX,
+    //   scale: PROJECT_SCALE_FACTOR,
+    // });
 
-  return useMemo(() => {
-    const windowClosed = windowState === "DESTROY";
-    const windowOpen = windowState === "SPAWN";
+    if (isOpen) return null;
     return (
       <motion.div
         layout="position"
-        className={`${ClassPrefix}`}
-        style={{
-          width: windowOpen ? 0 : 150,
-          opacity: windowClosed ? 1 : 0,
-        }}
+        layoutId={title}
+        className={ClassPrefix}
+        style={{ opacity: isClosed ? 1 : 0 }}
       >
         <motion.div
-          ref={iconRef}
+          ref={ref}
           className={`${ClassPrefix}__icon-container`}
           onClick={spawnWindow}
-          style={{
-            ...style,
-            pointerEvents: windowOpen ? "none" : "all",
-            translateX: windowOpen ? 75 : 0,
-          }}
+          // style={style}
         >
           <motion.div className={`${ClassPrefix}__icon`}>
-            {icon && <img alt="project-icon" src={icon} />}
+            {icon && <img alt={`${title} icon`} src={icon} />}
           </motion.div>
         </motion.div>
         <div className={`${ClassPrefix}__title`}>{title}</div>
       </motion.div>
     );
-  }, [windowState]);
-};
+  }
+);

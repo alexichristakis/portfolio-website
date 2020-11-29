@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import {
   animate,
   motion,
@@ -24,7 +24,9 @@ enum Direction {
 interface WindowProps extends WindowConfig {
   onRequestClose: () => void;
   destroyWindow: () => void;
-  containerRef: React.RefObject<HTMLDivElement>;
+  sourceRefs: React.RefObject<{
+    [id: string]: React.RefObject<HTMLElement>;
+  }>;
 }
 
 interface DraggableCornerProps {
@@ -69,10 +71,11 @@ const WINDOW_WIDTH = 500;
 const WINDOW_HEIGHT = 400;
 
 export const Window: React.FC<WindowProps> = ({
-  containerRef,
   onRequestClose,
   destroyWindow,
   sourceRef,
+  sourceRefs,
+  id,
   content,
   title,
   icon,
@@ -83,7 +86,10 @@ export const Window: React.FC<WindowProps> = ({
   const width = useMotionValue(WINDOW_WIDTH);
   const height = useMotionValue(WINDOW_HEIGHT);
 
-  const sourceRect = sourceRef.current?.getBoundingClientRect()!;
+  const sourceRect = useMemo(
+    () => sourceRef.current?.getBoundingClientRect()!,
+    [sourceRef]
+  );
   const offsetX = useMotionValue(sourceRect.left);
   const offsetY = useMotionValue(sourceRect.top);
   const scaleX = useMotionValue(sourceRect.width / WINDOW_WIDTH);
@@ -154,21 +160,26 @@ export const Window: React.FC<WindowProps> = ({
 
   const handleOnClickClose = useCallback(() => {
     onRequestClose();
-    const sourceRect = sourceRef.current?.getBoundingClientRect();
-    if (sourceRect) {
-      const scaleXDest = sourceRect.width / width.get();
-      const scaleYDest = sourceRect.height / height.get();
+    requestAnimationFrame(() => {
+      const sourceRect = sourceRefs.current?.[
+        id
+      ].current?.getBoundingClientRect();
 
-      animate(animation, 0);
-      animate(offsetX, sourceRect.left, transitionConfig);
-      animate(offsetY, sourceRect.top, transitionConfig);
-      animate(scaleX, scaleXDest, transitionConfig);
-      animate(scaleY, scaleYDest, transitionConfig);
-    }
+      // const sourceRect = sourceRef.current?.getBoundingClientRect();
+      console.log(sourceRef, sourceRect);
+      if (sourceRect) {
+        const scaleXDest = sourceRect.width / width.get();
+        const scaleYDest = sourceRect.height / height.get();
 
-    setTimeout(() => {
-      destroyWindow();
-    }, transitionConfig.duration * 1000);
+        animate(animation, 0);
+        animate(offsetX, sourceRect.left, transitionConfig);
+        animate(offsetY, sourceRect.top, transitionConfig);
+        animate(scaleX, scaleXDest, transitionConfig);
+        animate(scaleY, scaleYDest, transitionConfig);
+      }
+
+      setTimeout(destroyWindow, transitionConfig.duration * 1000);
+    });
   }, []);
 
   const Prefix = "window";
@@ -183,7 +194,6 @@ export const Window: React.FC<WindowProps> = ({
       className={Prefix}
       ref={windowRef}
       onPan={handleOnDrag}
-      dragConstraints={containerRef}
       style={{ width, height, transform, borderRadius, zIndex }}
     >
       {icon && (

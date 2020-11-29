@@ -2,10 +2,11 @@ import { AnimateSharedLayout, motion } from "framer-motion";
 
 import Icons from "../assets/icons";
 import { Project as ProjectType } from "../types";
+import { useWindowEvents, useWindows } from "../hooks";
 import { Project } from "./project";
 import "./projects.scss";
-
-const ClassPrefix = "projects";
+import { useContext } from "react";
+import { WindowManagerContext } from "../context";
 
 const PROJECTS: ProjectType[] = [
   {
@@ -55,12 +56,28 @@ const PROJECTS: ProjectType[] = [
   },
 ];
 
-export const Projects: React.FC = () => (
-  <motion.div layout="position" className={ClassPrefix}>
-    <AnimateSharedLayout>
-      {PROJECTS.map((project) => (
-        <Project key={project.title} {...project} />
-      ))}
-    </AnimateSharedLayout>
-  </motion.div>
-);
+export const Projects: React.FC = () => {
+  // const { state } = useWindows({});
+  const { state } = useWindowEvents();
+  const { windows, openWindows } = useContext(WindowManagerContext);
+
+  // // console.log("render projects", state);
+  const projects = PROJECTS.filter(({ title }) => !openWindows.includes(title));
+
+  console.log("render projects", state);
+  return (
+    <div className="projects">
+      <AnimateSharedLayout _dependency={state}>
+        {projects.map((project) => (
+          // <motion.div
+          //   key={project.title}
+          //   layout="position"
+          //   layoutId={project.title}
+          // >
+          <Project key={project.title} {...project} />
+          // </motion.div>
+        ))}
+      </AnimateSharedLayout>
+    </div>
+  );
+};

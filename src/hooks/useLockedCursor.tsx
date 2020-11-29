@@ -19,37 +19,37 @@ export const useLockedCursor = (
   }
 ) => {
   const { handlers } = config;
-  const isLocked = useToggle(false);
+  // const isLocked = useToggle(false);
   const zIndex = useMotionValue(0);
   const scale = useSpring(1);
   const { position, lockedRect, lock, unlock } = useContext(CursorStateContext);
 
-  const xOffset = useTransform(position.x, (x) => {
-    if (isLocked.value && lockedRect.current) {
-      const { width, left } = lockedRect.current;
-      const halfWidth = width / 2;
-      const leftOffset = ((x - left - halfWidth) / halfWidth) * 8;
+  // const xOffset = useTransform(position.x, (x) => {
+  //   if (isLocked.value && lockedRect.current) {
+  //     const { width, left } = lockedRect.current;
+  //     const halfWidth = width / 2;
+  //     const leftOffset = ((x - left - halfWidth) / halfWidth) * 8;
 
-      return leftOffset;
-    }
+  //     return leftOffset;
+  //   }
 
-    return 0;
-  });
+  //   return 0;
+  // });
 
-  const yOffset = useTransform(position.y, (y) => {
-    if (isLocked.value && lockedRect.current) {
-      const { height, top } = lockedRect.current;
-      const halfHeight = height / 2;
-      const topOffset = ((y - top - halfHeight) / halfHeight) * 8;
+  // const yOffset = useTransform(position.y, (y) => {
+  //   if (isLocked.value && lockedRect.current) {
+  //     const { height, top } = lockedRect.current;
+  //     const halfHeight = height / 2;
+  //     const topOffset = ((y - top - halfHeight) / halfHeight) * 8;
 
-      return topOffset;
-    }
+  //     return topOffset;
+  //   }
 
-    return 0;
-  });
+  //   return 0;
+  // });
 
   const handleMouseEnter = useCallback((ev: MouseEvent) => {
-    isLocked.setTrue();
+    // isLocked.setTrue();
     const rect = ref.current?.getBoundingClientRect();
     if (rect) lock(rect, config.scale, config.zIndex);
     if (config.zIndex) zIndex.set(config.zIndex);
@@ -57,13 +57,13 @@ export const useLockedCursor = (
     handlers?.onMouseEnter?.(ev);
   }, []);
 
-  const handleMouseLeave = useCallback((ev: MouseEvent) => {
-    isLocked.setFalse();
+  const handleMouseLeave = useCallback((ev?: MouseEvent) => {
+    // isLocked.setFalse();
     unlock();
 
     scale.set(1);
     zIndex.set(0);
-    handlers?.onMouseLeave?.(ev);
+    handlers?.onMouseLeave?.(ev!);
   }, []);
 
   useEffect(() => {
@@ -77,10 +77,11 @@ export const useLockedCursor = (
     });
 
     return () => {
+      handleMouseLeave();
       node?.removeEventListener("mouseenter", handleMouseEnter);
       node?.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, []);
+  });
 
   // const transform = useTranslate({
   //   x: useSpring(xOffset),
@@ -89,7 +90,7 @@ export const useLockedCursor = (
 
   return {
     cursorPosition: position,
-    isLocked: isLocked.value,
+    // isLocked: isLocked.value,
     style: {
       // transform,
       scale,

@@ -1,5 +1,6 @@
-import { MotionValue, useMotionValue } from "framer-motion";
 import { createContext, useCallback, useRef, useEffect } from "react";
+import { MotionValue, useMotionValue } from "framer-motion";
+
 import { CURSOR_ZINDEX } from "../lib";
 
 export type CursorMoveHandlers = {
