@@ -1,4 +1,5 @@
 export type Project = {
   title: string;
-  color?: string;
+  icon?: string;
+  content: JSX.Element;
 };

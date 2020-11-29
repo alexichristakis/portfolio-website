@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import {
   animate,
   motion,
@@ -9,7 +8,6 @@ import {
 } from "framer-motion";
 
 import { useCursorEvents } from "../hooks";
-import { CURSOR_ZINDEX } from "../lib";
 import "./cursor.scss";
 
 const ClassPrefix = "cursor";

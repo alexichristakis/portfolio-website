@@ -1,41 +1,66 @@
-import React from "react";
-import styled from "styled-components";
+import { AnimateSharedLayout, motion } from "framer-motion";
 
-import { Project } from "./project";
+import Icons from "../assets/icons";
 import { Project as ProjectType } from "../types";
-import { BOX_SIZE } from "../lib";
-
+import { Project } from "./project";
 import "./projects.scss";
 
 const ClassPrefix = "projects";
 
-// const Container = styled.div`
-//   padding: 50px;
-//   display: grid;
-//   grid-template-columns: repeat(3, ${BOX_SIZE}px);
-//   grid-template-rows: repeat(3, ${BOX_SIZE}px) auto;
-//   grid-column-gap: 64px;
-//   grid-row-gap: 64px;
-// `;
-
 const PROJECTS: ProjectType[] = [
-  { title: "paint party" },
-  { title: "unexpected" },
-  { title: "screentime" },
-  { title: "herd" },
-  { title: "evently" },
-  { title: "resume" },
-  { title: "accordion" },
-  { title: "sesh" },
-  { title: "twitterlytics" },
+  {
+    title: "resume",
+    icon: Icons.resume,
+    content: <div>hello!</div>,
+  },
+  {
+    title: "paint.party",
+    icon: Icons.paintParty,
+    content: <div>hello!</div>,
+  },
+  {
+    title: "unexpected",
+    icon: Icons.unexpected,
+    content: <div>hello!</div>,
+  },
+  {
+    title: "screentime",
+    content: <div>hello!</div>,
+    // icon: "",
+  },
+  {
+    title: "herd",
+    icon: Icons.herd,
+    content: <div>hello!</div>,
+  },
+  {
+    title: "evently",
+    icon: Icons.evently,
+    content: <div>hello!</div>,
+  },
+  {
+    title: "accordion",
+    // icon: "",
+    content: <div>hello!</div>,
+  },
+  {
+    title: "sesh",
+    icon: Icons.sesh,
+    content: <div>hello!</div>,
+  },
+  {
+    title: "twitterlytics",
+    content: <div>hello!</div>,
+    // icon: "",
+  },
 ];
 
-export const Projects: React.FC = () => {
-  return (
-    <div className={ClassPrefix}>
+export const Projects: React.FC = () => (
+  <motion.div layout="position" className={ClassPrefix}>
+    <AnimateSharedLayout>
       {PROJECTS.map((project) => (
-        <Project {...project} />
+        <Project key={project.title} {...project} />
       ))}
-    </div>
-  );
-};
+    </AnimateSharedLayout>
+  </motion.div>
+);

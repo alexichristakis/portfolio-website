@@ -5,6 +5,7 @@ import {
   PanInfo,
   useMotionTemplate,
   useMotionValue,
+  useTransform,
 } from "framer-motion";
 import cn from "classnames";
 
@@ -74,8 +75,11 @@ export const Window: React.FC<WindowProps> = ({
   sourceRef,
   content,
   title,
+  icon,
 }) => {
   const windowRef = useRef<HTMLDivElement>(null);
+  const animation = useMotionValue(0);
+
   const width = useMotionValue(WINDOW_WIDTH);
   const height = useMotionValue(WINDOW_HEIGHT);
 
@@ -93,8 +97,12 @@ export const Window: React.FC<WindowProps> = ({
   } as const;
 
   useLayoutEffect(() => {
-    animate(offsetX, 10, transitionConfig);
-    animate(offsetY, 10, transitionConfig);
+    const initialX = (window.innerWidth - WINDOW_WIDTH) / 2;
+    const initialY = (window.innerHeight - WINDOW_HEIGHT) / 2;
+
+    animate(animation, 1);
+    animate(offsetX, initialX, transitionConfig);
+    animate(offsetY, initialY, transitionConfig);
     animate(scaleX, 1, transitionConfig);
     animate(scaleY, 1, transitionConfig);
   }, []);
@@ -151,6 +159,7 @@ export const Window: React.FC<WindowProps> = ({
       const scaleXDest = sourceRect.width / width.get();
       const scaleYDest = sourceRect.height / height.get();
 
+      animate(animation, 0);
       animate(offsetX, sourceRect.left, transitionConfig);
       animate(offsetY, sourceRect.top, transitionConfig);
       animate(scaleX, scaleXDest, transitionConfig);
@@ -163,15 +172,28 @@ export const Window: React.FC<WindowProps> = ({
   }, []);
 
   const Prefix = "window";
-  const transform = useMotionTemplate`translate(${offsetX}px, ${offsetY}px) scale(${scaleX}, ${scaleY})`;
+  const transform = useMotionTemplate`\
+    translate(${offsetX}px, ${offsetY}px)\
+    scale(${scaleX}, ${scaleY})`;
+
+  const iconOpacity = useTransform(animation, [0, 0.1, 0.75, 1], [1, 1, 0, 0]);
+  const borderRadius = useTransform(animation, [0, 1], [50, 5]);
   return (
     <motion.div
       className={Prefix}
       ref={windowRef}
       onPan={handleOnDrag}
       dragConstraints={containerRef}
-      style={{ width, height, transform, zIndex }}
+      style={{ width, height, transform, borderRadius, zIndex }}
     >
+      {icon && (
+        <motion.img
+          className={`${Prefix}__icon`}
+          alt="project-icon"
+          style={{ opacity: iconOpacity }}
+          src={icon}
+        />
+      )}
       <div className={`${Prefix}__header`}>
         <div className={`${Prefix}__title`}>{title}</div>
         <Button onClick={handleOnClickClose}>

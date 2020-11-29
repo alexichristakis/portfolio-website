@@ -11,4 +11,4 @@ export type {
   CursorEventListener,
   CursorEventListenerCallback,
 } from "./CursorState";
-export type { WindowConfig } from "./WindowManager";
+export type { WindowConfig, WindowEventType } from "./WindowManager";

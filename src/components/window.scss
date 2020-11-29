@@ -1,8 +1,7 @@
 .window {
   user-select: none;
   position: absolute;
-  background-color: aliceblue;
-  border-radius: 5px;
+  background-color: var(--near-white);
   box-shadow: 0 0 2px 0px var(--lightest-gray);
   overflow: hidden;
   pointer-events: all;
@@ -38,6 +37,14 @@
     height: 100%;
     background: var(--near-white);
     overflow-y: scroll;
+  }
+
+  &__icon {
+    position: absolute;
+    overflow: hidden;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
   }
 }
 

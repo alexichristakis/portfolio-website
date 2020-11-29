@@ -21,8 +21,5 @@
     "jsx": "react-jsx",
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "src",
-    "./declarations/*.d.ts"
-  ]
+  "include": ["src"]
 }

@@ -39,7 +39,7 @@ export const CursorStateContext = createContext({} as CursorPositionState);
 
 export const CursorStateProvider: React.FC = ({ children }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lockedRect = useRef<DOMRect | null>(null);
   const scaleFactor = useRef<number>(1);
   const eventCallbacks = useRef<CursorEventListener[]>([]);
