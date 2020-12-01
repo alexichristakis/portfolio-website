@@ -24,65 +24,61 @@ import "./projects.scss";
 
 const PROJECTS: ProjectType[] = [
   {
-    id: "0",
     title: "resume",
     icon: Icons.resume,
     content: <div>hello!</div>,
   },
   {
-    id: "1",
     title: "paint.party",
     icon: Icons.paintParty,
     content: <div>hello!</div>,
     link: "https://paintparty.io",
   },
   {
-    id: "2",
     title: "unexpected",
     icon: Icons.unexpected,
     content: <div>hello!</div>,
   },
   {
-    id: "3",
     title: "screentime",
     content: <div>hello!</div>,
     icon: Icons.screentime,
     link: "https://screentime-525d7.firebaseapp.com",
   },
   {
-    id: "4",
     title: "accordion",
     icon: Icons.accordion,
     content: <div>hello!</div>,
   },
   {
-    id: "5",
+    title: "photos",
+    content: <div>hello!</div>,
+  },
+  {
     title: "herd",
     icon: Icons.herd,
     content: <div>hello!</div>,
   },
   {
-    id: "6",
     title: "evently",
     icon: Icons.evently,
     content: <div>hello!</div>,
   },
   {
-    id: "7",
     title: "sesh",
     icon: Icons.sesh,
     content: <div>hello!</div>,
   },
   {
-    id: "8",
     title: "twitterlytics",
     content: <div>hello!</div>,
     // icon: "",
   },
 ];
 
-interface ProjectIconProps extends ProjectType {}
-
+interface ProjectIconProps extends ProjectType {
+  id: string;
+}
 export const ProjectIcon: React.FC<ProjectIconProps> = ({
   title,
   icon,
@@ -159,9 +155,9 @@ export const Projects: React.FC = () => {
 
   return (
     <div className="projects">
-      <AnimateSharedLayout>
-        {PROJECTS.map(({ id, ...rest }) => (
-          <ProjectIcon key={id} id={id} {...rest} />
+      <AnimateSharedLayout _transition={TWEEN_ANIMATION}>
+        {PROJECTS.map(({ title, ...rest }) => (
+          <ProjectIcon key={title} id={title} title={title} {...rest} />
         ))}
       </AnimateSharedLayout>
     </div>

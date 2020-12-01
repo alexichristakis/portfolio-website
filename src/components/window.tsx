@@ -2,6 +2,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import {
   animate,
   motion,
+  MotionValue,
   PanInfo,
   useMotionTemplate,
   useMotionValue,
@@ -23,6 +24,7 @@ enum Direction {
 }
 
 interface WindowProps extends WindowConfig {
+  topWindow: MotionValue<string>;
   onRequestClose: () => void;
   destroyWindow: () => void;
 }
@@ -63,6 +65,8 @@ const WINDOW_WIDTH = 500;
 const WINDOW_HEIGHT = 400;
 
 export const Window: React.FC<WindowProps> = ({
+  topWindow,
+  id,
   onRequestClose,
   destroyWindow,
   sourceRef,
@@ -75,6 +79,9 @@ export const Window: React.FC<WindowProps> = ({
 
   const width = useMotionValue(WINDOW_WIDTH);
   const height = useMotionValue(WINDOW_HEIGHT);
+  const zIndex = useTransform(topWindow, (windowId) =>
+    windowId === id ? WINDOW_ZINDEX + 1 : WINDOW_ZINDEX
+  );
 
   const sourceRect = useMemo(
     () => sourceRef.current?.getBoundingClientRect()!,
@@ -85,7 +92,6 @@ export const Window: React.FC<WindowProps> = ({
   const offsetY = useMotionValue(sourceRect.top);
   const scaleX = useMotionValue(sourceRect.width / WINDOW_WIDTH);
   const scaleY = useMotionValue(sourceRect.height / WINDOW_HEIGHT);
-  const zIndex = useMotionValue(WINDOW_ZINDEX);
   const borderRadius = useMotionValue(
     ICON_BORDER_RADIUS / sourceRect.width / WINDOW_WIDTH
   );
@@ -192,6 +198,7 @@ export const Window: React.FC<WindowProps> = ({
       className={Prefix}
       ref={windowRef}
       onPan={handleOnDrag}
+      onMouseDown={() => topWindow.set(id)}
       style={{ width, height, zIndex, borderRadius, transform }}
     >
       <div className={`${Prefix}__header`}>

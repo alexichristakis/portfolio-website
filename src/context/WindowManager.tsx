@@ -3,6 +3,7 @@ import { Subject } from "rxjs";
 
 import { Project as ProjectType } from "../types";
 import { Window } from "../components";
+import { useMotionValue } from "framer-motion";
 
 export type WindowConfig = ProjectType & {
   id: string;
@@ -17,7 +18,6 @@ export type WindowEventHandlers = {
 
 type WindowManagerState = {
   events: Subject<WindowManagerEventPayload>;
-  getWindowState: (id: string) => WindowState;
   registerWindow: (window: WindowConfig) => void;
   openWindow: (id: string) => void;
   closeWindow: (id: string) => void;
@@ -44,6 +44,7 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
   const registeredWindows = useRef<WindowMap>({});
   const [openWindows, setOpenWindows] = useState<string[]>([]);
   const events = useMemo(() => new Subject<WindowManagerEventPayload>(), []);
+  const topWindow = useMotionValue("");
 
   const registerWindow = useCallback((window: WindowConfig) => {
     if (!registeredWindows.current[window.id]) {
@@ -81,15 +82,9 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
     setOpenWindows((prev) => prev.filter((window) => window !== id));
   }, []);
 
-  const getWindowState = useCallback(
-    (id: string) => registeredWindows.current[id]?.state ?? WindowState.CLOSED,
-    []
-  );
-
   const state = useMemo(
     () => ({
       events,
-      getWindowState,
       openWindow,
       closeWindow,
       registerWindow,
@@ -106,6 +101,7 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
             key={id}
             onRequestClose={() => requestClose(id)}
             destroyWindow={() => closeWindow(id)}
+            topWindow={topWindow}
             {...registeredWindows.current[id]}
           />
         ))}
