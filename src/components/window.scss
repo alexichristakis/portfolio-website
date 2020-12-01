@@ -1,29 +1,57 @@
 .window {
+  // &::before {
+  //   // border-radius: 100px;
+  //   position: absolute;
+  //   clip-path: inset(0% 0% 0% 0% round 10px);
+  //   // z-index: -1;
+  // }
+
+  // clip-path: url(#squircle);
+  pointer-events: all;
+  background-color: var(--near-white);
+  transform-origin: top left;
   user-select: none;
   position: absolute;
-  background-color: var(--near-white);
   box-shadow: 0 0 2px 0px var(--lightest-gray);
   overflow: hidden;
-  pointer-events: all;
-  transform-origin: top left;
 
   &__header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     padding: 8px;
-    background: var(--light-gray);
+    background: var(--near-black);
+    color: var(--near-white);
     top: 0;
   }
 
-  &__close-button {
-    color: var(--near-white);
-    width: 10px;
-    height: 10px;
-  }
+  &__buttons {
+    display: flex;
+    flex-direction: row;
 
-  &__title {
-    color: var(--near-white);
+    .button {
+      display: flex;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 1px solid var(--lightest-gray);
+      justify-content: center;
+      align-items: center;
+
+      &:hover {
+        &.red {
+          background: var(--dark-red);
+        }
+
+        &.green {
+          background: var(--dark-green);
+        }
+      }
+
+      &:not(:last-child) {
+        margin-right: 4px;
+      }
+    }
   }
 
   &__container {
@@ -40,7 +68,9 @@
   }
 
   &__icon {
+    pointer-events: none;
     position: absolute;
+    top: 0;
     overflow: hidden;
     pointer-events: none;
     width: 100%;
@@ -53,6 +83,7 @@
   position: absolute;
   width: 20px;
   height: 20px;
+  color: var(--dark-gray);
   &-0 {
     left: 0;
     top: 0;

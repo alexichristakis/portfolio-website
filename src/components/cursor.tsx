@@ -12,9 +12,11 @@ import "./cursor.scss";
 
 const ClassPrefix = "cursor";
 
+const DEFAULT_CURSOR_SIZE = 20;
+
 export const Cursor: React.FC = () => {
-  const cursorWidth = useMotionValue(10);
-  const cursorHeight = useMotionValue(10);
+  const cursorWidth = useMotionValue(DEFAULT_CURSOR_SIZE);
+  const cursorHeight = useMotionValue(DEFAULT_CURSOR_SIZE);
 
   const transitionConfig: Tween = {
     type: "tween",
@@ -33,8 +35,8 @@ export const Cursor: React.FC = () => {
         }
       },
       onUnlock: ({ rect }) => {
-        animate(cursorWidth, 10, transitionConfig);
-        animate(cursorHeight, 10, transitionConfig);
+        animate(cursorWidth, DEFAULT_CURSOR_SIZE, transitionConfig);
+        animate(cursorHeight, DEFAULT_CURSOR_SIZE, transitionConfig);
       },
     }
   );

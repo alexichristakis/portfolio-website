@@ -12,7 +12,7 @@ export type WindowConfig = ProjectType & {
 export type WindowEventHandlers = {
   onRequestClose?: () => void;
   onClose?: () => void;
-  onSpawn?: () => void;
+  onOpen?: () => void;
 };
 
 type WindowManagerState = {

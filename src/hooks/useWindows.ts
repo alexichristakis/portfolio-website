@@ -1,12 +1,18 @@
 import { useContext, useEffect, useRef, useState } from "react";
 
-import { WindowConfig, WindowManagerContext, WindowState } from "../context";
+import {
+  WindowConfig,
+  WindowEventHandlers,
+  WindowManagerContext,
+  WindowState,
+} from "../context";
 
 export type UseWindowConfig = {
   window: Omit<WindowConfig, "sourceRef">;
+  handlers?: WindowEventHandlers;
 };
 
-export const useWindows = ({ window }: UseWindowConfig) => {
+export const useWindows = ({ window, handlers }: UseWindowConfig) => {
   const sourceRef = useRef<HTMLDivElement>(null);
   const [windowState, setWindowState] = useState(WindowState.CLOSED);
   const { openWindow, registerWindow, events } = useContext(
@@ -21,6 +27,15 @@ export const useWindows = ({ window }: UseWindowConfig) => {
 
       if (id === window.id) {
         setWindowState(type);
+        if (type === WindowState.OPEN) {
+          handlers?.onOpen?.();
+        }
+        if (type === WindowState.CLOSING) {
+          handlers?.onRequestClose?.();
+        }
+        if (type === WindowState.CLOSED) {
+          handlers?.onClose?.();
+        }
       }
     });
 

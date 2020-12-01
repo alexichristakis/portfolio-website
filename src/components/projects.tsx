@@ -1,22 +1,26 @@
+import { useMemo, useRef } from "react";
 import {
-  createRef,
-  memo,
-  RefObject,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { AnimateSharedLayout, motion } from "framer-motion";
+  AnimateSharedLayout,
+  motion,
+  MotionStyle,
+  useMotionValue,
+  useTransform,
+  animate,
+  useMotionTemplate,
+} from "framer-motion";
 
 import Icons from "../assets/icons";
 import { Project as ProjectType } from "../types";
-import { WindowState, WindowManagerContext } from "../context";
+import { WindowState } from "../context";
+import {
+  ICON_BORDER_RADIUS,
+  ICON_ZINDEX,
+  setMultipleRefs,
+  TWEEN_ANIMATION,
+} from "../lib";
+import { useLockedCursor, useWindowEvents, useWindows } from "../hooks";
+
 import "./projects.scss";
-import { ICON_ZINDEX, setMultipleRefs } from "../lib";
-import { useLockedCursor } from "../hooks";
 
 const PROJECTS: ProjectType[] = [
   {
@@ -30,6 +34,7 @@ const PROJECTS: ProjectType[] = [
     title: "paint.party",
     icon: Icons.paintParty,
     content: <div>hello!</div>,
+    link: "https://paintparty.io",
   },
   {
     id: "2",
@@ -41,24 +46,25 @@ const PROJECTS: ProjectType[] = [
     id: "3",
     title: "screentime",
     content: <div>hello!</div>,
-    // icon: "",
+    icon: Icons.screentime,
+    link: "https://screentime-525d7.firebaseapp.com",
   },
   {
     id: "4",
+    title: "accordion",
+    icon: Icons.accordion,
+    content: <div>hello!</div>,
+  },
+  {
+    id: "5",
     title: "herd",
     icon: Icons.herd,
     content: <div>hello!</div>,
   },
   {
-    id: "5",
+    id: "6",
     title: "evently",
     icon: Icons.evently,
-    content: <div>hello!</div>,
-  },
-  {
-    id: "6",
-    title: "accordion",
-    // icon: "",
     content: <div>hello!</div>,
   },
   {
@@ -75,42 +81,64 @@ const PROJECTS: ProjectType[] = [
   },
 ];
 
-interface ProjectIconProps extends ProjectType {
-  onClick: () => void;
-  iconRef: RefObject<HTMLDivElement>;
-}
+interface ProjectIconProps extends ProjectType {}
 
 export const ProjectIcon: React.FC<ProjectIconProps> = ({
-  id,
   title,
   icon,
-  iconRef,
-  onClick,
+  ...rest
 }) => {
-  const [windowState, setWindowState] = useState<WindowState>(
-    WindowState.CLOSED
-  );
   const ref = useRef<HTMLDivElement>(null);
+  const openAnimation = useMotionValue(0);
 
-  const { events } = useContext(WindowManagerContext);
-
-  useLayoutEffect(() => {
-    const subscription = events.subscribe((payload) => {
-      if (payload.id === id) {
-        console.log("newState", payload.type);
-        setWindowState(payload.type);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { windowState, sourceRef, openWindow } = useWindows({
+    window: { title, icon, ...rest },
+    handlers: {
+      onOpen: () => openAnimation.set(1),
+      onClose: () => animate(openAnimation, 0, TWEEN_ANIMATION),
+    },
+  });
 
   const { style } = useLockedCursor(ref, {
     zIndex: ICON_ZINDEX,
     scale: 1.5,
   });
 
+  const titleAnimatedStyle: MotionStyle = {
+    translateY: useTransform(openAnimation, [0, 1], [0, -20]),
+  };
+
+  const boxShadowSpread = useTransform(openAnimation, [0, 1], [10, 0]);
+  const boxShadow = useMotionTemplate`0 0 ${boxShadowSpread}px 0px var(--lighter-gray)`;
+
   const ClassPrefix = "project";
+  const content = useMemo(
+    () => (
+      <>
+        <motion.div
+          ref={setMultipleRefs(sourceRef, ref)}
+          className={`${ClassPrefix}__icon-container`}
+          onClick={openWindow}
+          style={style}
+        >
+          <motion.div
+            className={`${ClassPrefix}__icon`}
+            style={{ borderRadius: ICON_BORDER_RADIUS, boxShadow }}
+          >
+            {icon && <img alt={`${title} icon`} src={icon} />}
+          </motion.div>
+        </motion.div>
+        <motion.div
+          className={`${ClassPrefix}__title`}
+          style={titleAnimatedStyle}
+        >
+          {title}
+        </motion.div>
+      </>
+    ),
+    []
+  );
+
   if (windowState === WindowState.OPEN) return null;
   return (
     <motion.div
@@ -119,61 +147,21 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({
       className={ClassPrefix}
       style={{ opacity: windowState === WindowState.CLOSED ? 1 : 0 }}
     >
-      <motion.div
-        ref={setMultipleRefs(iconRef, ref)}
-        className={`${ClassPrefix}__icon-container`}
-        onClick={onClick}
-        style={style}
-      >
-        <motion.div className={`${ClassPrefix}__icon`}>
-          {icon && <img alt={`${title} icon`} src={icon} />}
-        </motion.div>
-      </motion.div>
-      <div className={`${ClassPrefix}__title`}>{title}</div>
+      {content}
     </motion.div>
   );
 };
 
-type RefMap = { [id: string]: React.RefObject<HTMLDivElement> };
-
-const projectRefMap = PROJECTS.reduce((acc, { id }) => {
-  acc[id] = createRef();
-  return acc;
-}, {} as RefMap);
-
 export const Projects: React.FC = () => {
-  const [_, setRenderKey] = useState(0);
-  const sourceRefs = useRef<RefMap>(projectRefMap);
-  const { openWindow, registerWindow, events } = useContext(
-    WindowManagerContext
-  );
-
-  useLayoutEffect(() => {
-    PROJECTS?.forEach((project) => {
-      registerWindow({ ...project, sourceRef: sourceRefs.current[project.id] });
-    });
-
-    const subscription = events.subscribe((payload) => {
-      const { type } = payload;
-      if (type === WindowState.OPEN || type === WindowState.CLOSING) {
-        setRenderKey((prev) => prev + 1);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  // subscribe to window open and close events to update the shared layout
+  // at the appropriate times
+  useWindowEvents({ events: [WindowState.OPEN, WindowState.CLOSING] });
 
   return (
     <div className="projects">
       <AnimateSharedLayout>
         {PROJECTS.map(({ id, ...rest }) => (
-          <ProjectIcon
-            key={id}
-            id={id}
-            onClick={() => openWindow(id)}
-            iconRef={sourceRefs.current[id]}
-            {...rest}
-          />
+          <ProjectIcon key={id} id={id} {...rest} />
         ))}
       </AnimateSharedLayout>
     </div>

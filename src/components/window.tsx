@@ -9,8 +9,9 @@ import {
 } from "framer-motion";
 import cn from "classnames";
 
+import { SVG } from "../assets/icons";
+import { ICON_BORDER_RADIUS, TWEEN_ANIMATION, WINDOW_ZINDEX } from "../lib";
 import { WindowConfig } from "../context";
-import { WINDOW_ZINDEX } from "../lib";
 import { Button } from "./button";
 import "./window.scss";
 
@@ -50,16 +51,10 @@ const DraggableCorner: React.FC<DraggableCornerProps> = ({
       dragConstraints={containerRef}
       onPan={handleOnDrag}
     >
-      <svg
-        width="10"
-        height="10"
-        viewBox="0 0 10 10"
+      <SVG.Corner
         className={className}
-        transform={`rotate(${90 * direction})`}
-      >
-        <rect width="10" height="2" fill="#C4C4C4" />
-        <rect width="2" height="10" fill="#C4C4C4" />
-      </svg>
+        transform={`rotate(${direction * 90})`}
+      />
     </motion.div>
   );
 };
@@ -91,22 +86,20 @@ export const Window: React.FC<WindowProps> = ({
   const scaleX = useMotionValue(sourceRect.width / WINDOW_WIDTH);
   const scaleY = useMotionValue(sourceRect.height / WINDOW_HEIGHT);
   const zIndex = useMotionValue(WINDOW_ZINDEX);
-
-  const transitionConfig = {
-    type: "tween",
-    ease: "easeOut",
-    duration: 0.3,
-  } as const;
+  const borderRadius = useMotionValue(
+    ICON_BORDER_RADIUS / sourceRect.width / WINDOW_WIDTH
+  );
 
   useLayoutEffect(() => {
     const initialX = (window.innerWidth - WINDOW_WIDTH) / 2;
     const initialY = (window.innerHeight - WINDOW_HEIGHT) / 2;
 
     animate(animation, 1);
-    animate(offsetX, initialX, transitionConfig);
-    animate(offsetY, initialY, transitionConfig);
-    animate(scaleX, 1, transitionConfig);
-    animate(scaleY, 1, transitionConfig);
+    animate(offsetX, initialX, TWEEN_ANIMATION);
+    animate(offsetY, initialY, TWEEN_ANIMATION);
+    animate(scaleX, 1, TWEEN_ANIMATION);
+    animate(scaleY, 1, TWEEN_ANIMATION);
+    animate(borderRadius, 5, TWEEN_ANIMATION);
   }, []);
 
   const handleOnDrag = useCallback((ev: MouseEvent, info: PanInfo) => {
@@ -163,13 +156,29 @@ export const Window: React.FC<WindowProps> = ({
         const scaleYDest = destRect.height / height.get();
 
         animate(animation, 0);
-        animate(offsetX, destRect.left, transitionConfig);
-        animate(offsetY, destRect.top, transitionConfig);
-        animate(scaleX, scaleXDest, transitionConfig);
-        animate(scaleY, scaleYDest, transitionConfig);
+        animate(offsetX, destRect.left, TWEEN_ANIMATION);
+        animate(offsetY, destRect.top, TWEEN_ANIMATION);
+        animate(scaleX, scaleXDest, TWEEN_ANIMATION);
+        animate(scaleY, scaleYDest, TWEEN_ANIMATION);
+        animate(borderRadius, ICON_BORDER_RADIUS / scaleXDest, TWEEN_ANIMATION);
       }
-      setTimeout(destroyWindow, transitionConfig.duration * 1000);
+      setTimeout(destroyWindow, TWEEN_ANIMATION.duration * 1000);
     });
+  }, []);
+
+  const handleOnClickExpand = useCallback(() => {
+    if (
+      width.get() === window.innerWidth &&
+      height.get() === window.innerHeight
+    ) {
+      animate(width, WINDOW_WIDTH, TWEEN_ANIMATION);
+      animate(height, WINDOW_HEIGHT, TWEEN_ANIMATION);
+    } else {
+      animate(width, window.innerWidth, TWEEN_ANIMATION);
+      animate(height, window.innerHeight, TWEEN_ANIMATION);
+      animate(offsetX, 0, TWEEN_ANIMATION);
+      animate(offsetY, 0, TWEEN_ANIMATION);
+    }
   }, []);
 
   const Prefix = "window";
@@ -177,28 +186,24 @@ export const Window: React.FC<WindowProps> = ({
     translate(${offsetX}px, ${offsetY}px)\
     scale(${scaleX}, ${scaleY})`;
 
-  const iconOpacity = useTransform(animation, [0, 0.1, 0.75, 1], [1, 1, 0, 0]);
-  const borderRadius = useTransform(animation, [0, 1], [50, 5]);
+  const iconOpacity = useTransform(animation, [0, 0.2, 0.75, 1], [1, 1, 0, 0]);
   return (
     <motion.div
       className={Prefix}
       ref={windowRef}
       onPan={handleOnDrag}
-      style={{ width, height, transform, borderRadius, zIndex }}
+      style={{ width, height, zIndex, borderRadius, transform }}
     >
-      {icon && (
-        <motion.img
-          className={`${Prefix}__icon`}
-          alt="project-icon"
-          style={{ opacity: iconOpacity }}
-          src={icon}
-        />
-      )}
       <div className={`${Prefix}__header`}>
-        <div className={`${Prefix}__title`}>{title}</div>
-        <Button onClick={handleOnClickClose}>
-          <div className={`${Prefix}__close-button`}>&#215;</div>
-        </Button>
+        <div className={`${Prefix}__buttons`}>
+          <Button className="red" onClick={handleOnClickClose}>
+            <SVG.Close />
+          </Button>
+          <Button className="green" onClick={handleOnClickExpand}>
+            <SVG.Expand />
+          </Button>
+        </div>
+        {title}
       </div>
       <div className={`${Prefix}__content`}>{content}</div>
       {Object.values(Direction).map((direction) => (
@@ -209,6 +214,14 @@ export const Window: React.FC<WindowProps> = ({
           onDrag={handleOnDragCorner}
         />
       ))}
+      {icon && (
+        <motion.img
+          className={`${Prefix}__icon`}
+          alt="project-icon"
+          style={{ opacity: iconOpacity }}
+          src={icon}
+        />
+      )}
     </motion.div>
   );
 };
