@@ -1,0 +1,131 @@
+.bounding-box {
+  pointer-events: none;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+
+  &__box {
+    border-radius: 2px;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    border: 1px solid var(--blue);
+    z-index: 3;
+  }
+
+  &__close {
+    margin-right: 4px;
+  }
+
+  &__title {
+    bottom: 100%;
+    left: 4px;
+    pointer-events: auto;
+    position: absolute;
+    user-select: none;
+    z-index: 3;
+    display: flex;
+    flex-direction: row;
+    color: white;
+    background: var(--blue);
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    padding: 2px 6px 0 6px;
+    padding-bottom: 4px;
+  }
+}
+
+.resize-control {
+  $target-size: 16px;
+  $size: 10px;
+  $center: calc(50% - var(--size));
+
+  display: flex;
+  position: absolute;
+  pointer-events: all;
+  color: var(--dark-gray);
+
+  &__rail {
+    $size: $target-size;
+    pointer-events: auto;
+    position: absolute;
+    transition: inherit;
+    z-index: 1;
+
+    &-n {
+      top: -$size / 2;
+      left: 0;
+      height: $size;
+      width: 100%;
+    }
+
+    &-e {
+      top: 0;
+      right: -$size / 2;
+      height: 100%;
+      width: $size;
+    }
+
+    &-s {
+      bottom: -$size / 2;
+      left: 0;
+      height: $size;
+      width: 100%;
+    }
+
+    &-w {
+      top: 0;
+      left: -$size / 2;
+      height: 100%;
+      width: $size;
+    }
+  }
+
+  &__handle {
+    $size: 8px;
+    background-color: var(--white);
+    border: inherit;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.04);
+    height: $size;
+    width: $size;
+    margin: -$size / 2;
+    pointer-events: auto;
+    position: absolute;
+    z-index: 4;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: $target-size;
+      height: $target-size;
+      margin: -($target-size / 2);
+      z-index: 0;
+    }
+
+    &-nw {
+      top: 0;
+      left: 0;
+    }
+
+    &-ne {
+      top: 0;
+      right: 0;
+    }
+
+    &-sw {
+      bottom: 0;
+      left: 0;
+    }
+
+    &-se {
+      bottom: 0;
+      right: 0;
+    }
+  }
+}

@@ -3,4 +3,5 @@ export type Project = {
   icon?: string;
   link?: string;
   content: JSX.Element;
+  aspectRatio?: number;
 };

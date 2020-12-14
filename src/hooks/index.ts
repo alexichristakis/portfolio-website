@@ -5,3 +5,6 @@ export { useCursorEvents } from "./useCursorEvents";
 export { useWindows } from "./useWindows";
 export { useWindowEvents } from "./useWindowEvents";
 export { useForcedUpdate } from "./useForcedUpdate";
+export { useEvents } from "./useEvents";
+
+export type { Events } from "./useEvents";

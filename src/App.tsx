@@ -1,7 +1,7 @@
 import React from "react";
 
 import { WindowManagerProvider, CursorStateProvider } from "./context";
-import { Projects, Cursor } from "./components";
+import { ProjectIcons, Cursor } from "./components";
 
 import "./App.scss";
 
@@ -9,7 +9,7 @@ const App: React.FC = () => (
   <CursorStateProvider>
     <div className="app-container">
       <WindowManagerProvider>
-        <Projects />
+        <ProjectIcons />
       </WindowManagerProvider>
     </div>
     <Cursor />

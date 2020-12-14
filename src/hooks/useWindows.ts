@@ -15,14 +15,14 @@ export type UseWindowConfig = {
 export const useWindows = ({ window, handlers }: UseWindowConfig) => {
   const sourceRef = useRef<HTMLDivElement>(null);
   const [windowState, setWindowState] = useState(WindowState.CLOSED);
-  const { openWindow, registerWindow, events } = useContext(
+  const { openWindow, registerWindow, subscribe } = useContext(
     WindowManagerContext
   );
 
   useEffect(() => {
     registerWindow({ ...window, sourceRef });
 
-    const subscription = events.subscribe((payload) => {
+    const unsubscribe = subscribe((payload) => {
       const { type, id } = payload;
 
       if (id === window.id) {
@@ -39,7 +39,7 @@ export const useWindows = ({ window, handlers }: UseWindowConfig) => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   return {

@@ -1,27 +1,34 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { WindowManagerContext, WindowState } from "../context";
 import { useForcedUpdate } from "./useForcedUpdate";
 
 type UseWindowEventsConfig = {
   events: WindowState[];
+  handlers?: WindowEventHandlers;
   id?: string;
 };
 
-export const useWindowEvents = ({ events, id }: UseWindowEventsConfig) => {
+export const useWindowEvents = ({
+  events,
+  id: windowId,
+}: UseWindowEventsConfig) => {
+  const [state, setState] = useState(WindowState.CLOSED);
   const update = useForcedUpdate();
-  const { events: eventEmitter } = useContext(WindowManagerContext);
+  const { subscribe } = useContext(WindowManagerContext);
 
   useEffect(() => {
-    const subscription = eventEmitter.subscribe((payload) => {
-      const { type } = payload;
-      if (events.includes(type) && (!id || id === payload.id)) {
+    const unsubscribe = subscribe((payload) => {
+      const { type, id } = payload;
+
+      if ((!windowId || id === windowId) && events.includes(type)) {
+        setState(type);
         update();
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
-  return;
+  return { state };
 };

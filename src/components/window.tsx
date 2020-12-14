@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, memo, useRef } from "react";
 import {
   animate,
   motion,
@@ -8,20 +8,11 @@ import {
   useMotionValue,
   useTransform,
 } from "framer-motion";
-import cn from "classnames";
 
-import { SVG } from "../assets/icons";
-import { ICON_BORDER_RADIUS, TWEEN_ANIMATION, WINDOW_ZINDEX } from "../lib";
+import { TWEEN_ANIMATION, WINDOW_ZINDEX } from "../lib";
 import { WindowConfig } from "../context";
-import { Button } from "./button";
+import BoundingBox, { hasDirection, Direction } from "./boundingBox";
 import "./window.scss";
-
-enum Direction {
-  TOP_LEFT,
-  TOP_RIGHT,
-  BOTTOM_RIGHT,
-  BOTTOM_LEFT,
-}
 
 interface WindowProps extends WindowConfig {
   topWindow: MotionValue<string>;
@@ -29,87 +20,86 @@ interface WindowProps extends WindowConfig {
   destroyWindow: () => void;
 }
 
-interface DraggableCornerProps {
-  direction: Direction;
-  containerRef: React.RefObject<HTMLDivElement>;
-  onDrag: (info: PanInfo, direction: Direction) => void;
-}
-
-const DraggableCorner: React.FC<DraggableCornerProps> = ({
-  onDrag,
-  containerRef,
-  direction,
-}) => {
-  const handleOnDrag = (ev: MouseEvent, info: PanInfo) => {
-    ev.preventDefault();
-    onDrag(info, direction);
-  };
-
-  const Prefix = "draggable-corner";
-  const className = cn(Prefix, `${Prefix}-${direction}`);
-  return (
-    <motion.div
-      className={className}
-      dragConstraints={containerRef}
-      onPan={handleOnDrag}
-    >
-      <SVG.Corner
-        className={className}
-        transform={`rotate(${direction * 90})`}
-      />
-    </motion.div>
-  );
-};
-
 const WINDOW_WIDTH = 500;
 const WINDOW_HEIGHT = 400;
 
-export const Window: React.FC<WindowProps> = ({
-  topWindow,
-  id,
-  onRequestClose,
-  destroyWindow,
-  sourceRef,
-  content,
-  title,
-  icon,
-}) => {
-  const windowRef = useRef<HTMLDivElement>(null);
-  const animation = useMotionValue(0);
+export const Window: React.FC<WindowProps> = memo(
+  ({
+    topWindow,
+    id,
+    onRequestClose,
+    destroyWindow,
+    sourceRef,
+    content,
+    title,
+    aspectRatio,
+    icon,
+  }) => {
+    const windowRef = useRef<HTMLDivElement>(null);
+    const boundingBoxOpacityTimeout = useRef<NodeJS.Timeout | null>(null);
+    const isDragging = useRef(false);
+    const isClosing = useRef(false);
+    const animation = useMotionValue(0);
 
-  const width = useMotionValue(WINDOW_WIDTH);
-  const height = useMotionValue(WINDOW_HEIGHT);
-  const zIndex = useTransform(topWindow, (windowId) =>
-    windowId === id ? WINDOW_ZINDEX + 1 : WINDOW_ZINDEX
-  );
+    const width = useMotionValue(WINDOW_WIDTH);
+    const height = useMotionValue(
+      aspectRatio ? WINDOW_WIDTH * aspectRatio : WINDOW_HEIGHT
+    );
+    const boundingBoxOpacity = useMotionValue(0);
 
-  const sourceRect = useMemo(
-    () => sourceRef.current?.getBoundingClientRect()!,
-    []
-  );
+    const zIndex = useTransform(topWindow, (windowId) =>
+      windowId === id ? WINDOW_ZINDEX + 1 : WINDOW_ZINDEX
+    );
 
-  const offsetX = useMotionValue(sourceRect.left);
-  const offsetY = useMotionValue(sourceRect.top);
-  const scaleX = useMotionValue(sourceRect.width / WINDOW_WIDTH);
-  const scaleY = useMotionValue(sourceRect.height / WINDOW_HEIGHT);
-  const borderRadius = useMotionValue(
-    ICON_BORDER_RADIUS / sourceRect.width / WINDOW_WIDTH
-  );
+    const getSourceRect = () => sourceRef.current?.getBoundingClientRect()!;
 
-  useLayoutEffect(() => {
-    const initialX = (window.innerWidth - WINDOW_WIDTH) / 2;
-    const initialY = (window.innerHeight - WINDOW_HEIGHT) / 2;
+    const initialRect = getSourceRect();
+    const offsetX = useMotionValue(initialRect.left);
+    const offsetY = useMotionValue(initialRect.top);
+    const scaleX = useMotionValue(initialRect.width / width.get());
+    const scaleY = useMotionValue(initialRect.height / height.get());
 
-    animate(animation, 1);
-    animate(offsetX, initialX, TWEEN_ANIMATION);
-    animate(offsetY, initialY, TWEEN_ANIMATION);
-    animate(scaleX, 1, TWEEN_ANIMATION);
-    animate(scaleY, 1, TWEEN_ANIMATION);
-    animate(borderRadius, 5, TWEEN_ANIMATION);
-  }, []);
+    useLayoutEffect(() => {
+      const initialX = (window.innerWidth - WINDOW_WIDTH) / 2;
+      const initialY = (window.innerHeight - WINDOW_HEIGHT) / 2;
 
-  const handleOnDrag = useCallback((ev: MouseEvent, info: PanInfo) => {
-    if (!ev.defaultPrevented) {
+      animate(animation, 1, TWEEN_ANIMATION);
+      animate(offsetX, initialX, TWEEN_ANIMATION);
+      animate(offsetY, initialY, TWEEN_ANIMATION);
+      animate(scaleX, 1, TWEEN_ANIMATION);
+      animate(scaleY, 1, TWEEN_ANIMATION);
+    }, []);
+
+    const flashBoundingBox = () => {
+      if (!isClosing.current) {
+        if (boundingBoxOpacityTimeout.current) {
+          clearTimeout(boundingBoxOpacityTimeout.current);
+        }
+
+        animate(boundingBoxOpacity, 1, TWEEN_ANIMATION);
+        boundingBoxOpacityTimeout.current = setTimeout(() => {
+          animate(boundingBoxOpacity, 0, TWEEN_ANIMATION);
+        }, 1000);
+      }
+    };
+
+    const handleOnMouseMove = () => {
+      if (!isDragging.current) {
+        flashBoundingBox();
+      }
+    };
+
+    const handleOnDragEnd = () => {
+      isDragging.current = false;
+      flashBoundingBox();
+    };
+
+    const handleOnDrag = useCallback((ev: MouseEvent, info: PanInfo) => {
+      isDragging.current = true;
+      if (boundingBoxOpacityTimeout.current) {
+        clearTimeout(boundingBoxOpacityTimeout.current);
+      }
+
       const { x, y } = info.delta;
       const nextOffsetX = offsetX.get() + x;
       const nextOffsetY = offsetY.get() + y;
@@ -123,112 +113,129 @@ export const Window: React.FC<WindowProps> = ({
       if (currentHeight + nextOffsetY < window.innerHeight && nextOffsetY > 0) {
         offsetY.set(nextOffsetY);
       }
-    }
-  }, []);
+    }, []);
 
-  const handleOnDragCorner = useCallback(
-    (info: PanInfo, direction: Direction) => {
-      const { x, y } = info.delta;
-      const prevWidth = width.get();
-      const prevHeight = height.get();
+    const handleOnResize = useCallback(
+      (info: PanInfo, direction: Direction) => {
+        const { x, y } = info.delta;
+        let nextWidth = width.get();
+        let nextHeight = height.get();
+        let nextOffsetX = offsetX.get();
+        let nextOffsetY = offsetY.get();
+        if (hasDirection(direction, "n")) {
+          nextHeight -= y;
+          nextOffsetY += y;
+        }
 
-      if (direction === Direction.TOP_LEFT) {
-        width.set(prevWidth - x);
-        height.set(prevHeight - y);
-        offsetX.set(offsetX.get() + x);
-        offsetY.set(offsetY.get() + y);
-      } else if (direction === Direction.TOP_RIGHT) {
-        width.set(prevWidth + x);
-        height.set(prevHeight - y);
-        offsetY.set(offsetY.get() + y);
-      } else if (direction === Direction.BOTTOM_RIGHT) {
-        width.set(prevWidth + x);
-        height.set(prevHeight + y);
-      } else if (direction === Direction.BOTTOM_LEFT) {
-        width.set(prevWidth - x);
-        height.set(prevHeight + y);
-        offsetX.set(offsetX.get() + x);
-      }
-    },
-    []
-  );
+        if (hasDirection(direction, "e")) {
+          nextWidth += x;
+        }
 
-  const handleOnClickClose = useCallback(() => {
-    onRequestClose();
-    requestAnimationFrame(() => {
-      const destRect = sourceRef.current?.getBoundingClientRect();
-      if (destRect) {
-        const scaleXDest = destRect.width / width.get();
-        const scaleYDest = destRect.height / height.get();
+        if (hasDirection(direction, "s")) {
+          nextHeight += y;
+        }
 
-        animate(animation, 0);
-        animate(offsetX, destRect.left, TWEEN_ANIMATION);
-        animate(offsetY, destRect.top, TWEEN_ANIMATION);
-        animate(scaleX, scaleXDest, TWEEN_ANIMATION);
-        animate(scaleY, scaleYDest, TWEEN_ANIMATION);
-        animate(borderRadius, ICON_BORDER_RADIUS / scaleXDest, TWEEN_ANIMATION);
-      }
-      setTimeout(destroyWindow, TWEEN_ANIMATION.duration * 1000);
-    });
-  }, []);
+        if (hasDirection(direction, "w")) {
+          nextWidth -= x;
+          nextOffsetX += x;
+        }
 
-  const handleOnClickExpand = useCallback(() => {
-    if (
-      width.get() === window.innerWidth &&
-      height.get() === window.innerHeight
-    ) {
-      animate(width, WINDOW_WIDTH, TWEEN_ANIMATION);
-      animate(height, WINDOW_HEIGHT, TWEEN_ANIMATION);
-    } else {
-      animate(width, window.innerWidth, TWEEN_ANIMATION);
-      animate(height, window.innerHeight, TWEEN_ANIMATION);
-      animate(offsetX, 0, TWEEN_ANIMATION);
-      animate(offsetY, 0, TWEEN_ANIMATION);
-    }
-  }, []);
+        width.set(nextWidth);
+        offsetX.set(nextOffsetX);
+        height.set(nextHeight);
+        offsetY.set(nextOffsetY);
+      },
+      []
+    );
 
-  const Prefix = "window";
-  const transform = useMotionTemplate`\
+    const handleOnClose = useCallback(() => {
+      onRequestClose();
+      isClosing.current = true;
+      boundingBoxOpacity.set(0);
+      requestAnimationFrame(() => {
+        const destRect = getSourceRect();
+        if (destRect) {
+          const scaleXDest = destRect.width / width.get();
+          const scaleYDest = destRect.height / height.get();
+
+          animate(animation, 0, TWEEN_ANIMATION);
+          animate(offsetX, destRect.left, TWEEN_ANIMATION);
+          animate(offsetY, destRect.top, TWEEN_ANIMATION);
+          animate(scaleX, scaleXDest, TWEEN_ANIMATION);
+          animate(scaleY, scaleYDest, TWEEN_ANIMATION);
+        }
+        setTimeout(destroyWindow, TWEEN_ANIMATION.duration * 1000);
+      });
+    }, []);
+
+    // const handleOnClickExpand = useCallback(() => {
+    //   if (
+    //     width.get() === window.innerWidth &&
+    //     height.get() === window.innerHeight
+    //   ) {
+    //     animate(width, WINDOW_WIDTH, TWEEN_ANIMATION);
+    //     animate(height, WINDOW_HEIGHT, TWEEN_ANIMATION);
+    //   } else {
+    //     animate(width, window.innerWidth, TWEEN_ANIMATION);
+    //     animate(height, window.innerHeight, TWEEN_ANIMATION);
+    //     animate(offsetX, 0, TWEEN_ANIMATION);
+    //     animate(offsetY, 0, TWEEN_ANIMATION);
+    //   }
+    // }, []);
+
+    const Prefix = "window";
+    const transform = useMotionTemplate`\
     translate(${offsetX}px, ${offsetY}px)\
     scale(${scaleX}, ${scaleY})`;
 
-  const iconOpacity = useTransform(animation, [0, 0.2, 0.75, 1], [1, 1, 0, 0]);
-  return (
-    <motion.div
-      className={Prefix}
-      ref={windowRef}
-      onPan={handleOnDrag}
-      onMouseDown={() => topWindow.set(id)}
-      style={{ width, height, zIndex, borderRadius, transform }}
-    >
-      <div className={`${Prefix}__header`}>
-        <div className={`${Prefix}__buttons`}>
-          <Button className="red" onClick={handleOnClickClose}>
-            <SVG.Close />
-          </Button>
-          <Button className="green" onClick={handleOnClickExpand}>
-            <SVG.Expand />
-          </Button>
-        </div>
-        {title}
-      </div>
-      <div className={`${Prefix}__content`}>{content}</div>
-      {Object.values(Direction).map((direction) => (
-        <DraggableCorner
-          key={direction}
-          direction={direction as Direction}
-          containerRef={windowRef}
-          onDrag={handleOnDragCorner}
-        />
-      ))}
-      {icon && (
-        <motion.img
-          className={`${Prefix}__icon`}
-          alt="project-icon"
-          style={{ opacity: iconOpacity }}
-          src={icon}
-        />
-      )}
-    </motion.div>
-  );
-};
+    const iconOpacity = useTransform(
+      animation,
+      [0, 0.4, 0.75, 1],
+      [1, 0.4, 0, 0]
+    );
+
+    const contentOpacity = useTransform(iconOpacity, [0, 1], [1, 0]);
+
+    const backgroundOpacity = useTransform(animation, [0, 0.5, 1], [0, 1, 0]);
+
+    const boxShadowSpread = useTransform(animation, [0, 1], [0, 5]);
+    const boxShadow = useMotionTemplate`0 0 ${boxShadowSpread}px 0px var(--lighter-gray)`;
+    const background = useMotionTemplate`rgba(255,255,255,${backgroundOpacity})`;
+
+    return (
+      <motion.div
+        className={Prefix}
+        ref={windowRef}
+        onMouseDown={() => topWindow.set(id)}
+        onMouseMove={handleOnMouseMove}
+        onMouseLeave={() => animate(boundingBoxOpacity, 0, TWEEN_ANIMATION)}
+        style={{ width, height, zIndex, boxShadow, background, transform }}
+      >
+        <BoundingBox
+          title={title}
+          opacity={boundingBoxOpacity}
+          onResize={handleOnResize}
+          onClose={handleOnClose}
+        >
+          <motion.div
+            className={`${Prefix}__content`}
+            style={{ opacity: contentOpacity }}
+            onPan={handleOnDrag}
+            onPanEnd={handleOnDragEnd}
+          >
+            {content}
+          </motion.div>
+        </BoundingBox>
+        {icon && (
+          <motion.img
+            className={`${Prefix}__icon`}
+            alt={`${title} project-icon`}
+            style={{ opacity: iconOpacity }}
+            src={icon}
+          />
+        )}
+      </motion.div>
+    );
+  },
+  (p, n) => p.id === n.id
+);

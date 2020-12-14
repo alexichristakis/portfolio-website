@@ -1,68 +1,31 @@
 .window {
-  // &::before {
-  //   // border-radius: 100px;
-  //   position: absolute;
-  //   clip-path: inset(0% 0% 0% 0% round 10px);
-  //   // z-index: -1;
-  // }
+  $border-radius: 4px;
 
-  // clip-path: url(#squircle);
   pointer-events: all;
-  background-color: var(--near-white);
   transform-origin: top left;
   user-select: none;
   position: absolute;
-  box-shadow: 0 0 2px 0px var(--lightest-gray);
-  overflow: hidden;
+  border-radius: $border-radius;
 
   &__header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     padding: 8px;
-    background: var(--near-black);
+    background: rgba(0, 0, 0, 0.5);
     color: var(--near-white);
-    top: 0;
-  }
-
-  &__buttons {
-    display: flex;
-    flex-direction: row;
-
-    .button {
-      display: flex;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      border: 1px solid var(--lightest-gray);
-      justify-content: center;
-      align-items: center;
-
-      &:hover {
-        &.red {
-          background: var(--dark-red);
-        }
-
-        &.green {
-          background: var(--dark-green);
-        }
-      }
-
-      &:not(:last-child) {
-        margin-right: 4px;
-      }
-    }
-  }
-
-  &__container {
-    pointer-events: none;
-    transform-origin: top left;
   }
 
   &__content {
     display: flex;
     width: 100%;
     height: 100%;
+    border-radius: $border-radius;
+    pointer-events: all;
     background: var(--near-white);
     overflow-y: scroll;
   }
@@ -72,35 +35,9 @@
     position: absolute;
     top: 0;
     overflow: hidden;
+    border-radius: 50px;
     pointer-events: none;
     width: 100%;
     height: 100%;
-  }
-}
-
-.draggable-corner {
-  display: flex;
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  color: var(--dark-gray);
-  &-0 {
-    left: 0;
-    top: 0;
-  }
-
-  &-1 {
-    top: 0;
-    right: 0;
-  }
-
-  &-2 {
-    right: 0;
-    bottom: 0;
-  }
-
-  &-3 {
-    bottom: 0;
-    left: 0;
   }
 }

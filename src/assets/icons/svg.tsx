@@ -2,8 +2,8 @@ import { SVGProps } from "react";
 
 interface Props extends SVGProps<SVGSVGElement> {}
 
-const Close: React.FC<Props> = () => (
-  <svg width="7" height="7" viewBox="0 0 7 7" fill="none">
+const Close: React.FC<Props> = (props) => (
+  <svg width="7" height="7" viewBox="0 0 7 7" fill="none" {...props}>
     <line
       x1="0"
       y1="0"
@@ -25,21 +25,40 @@ const Close: React.FC<Props> = () => (
   </svg>
 );
 
-const Corner: React.FC<Props> = ({ className, transform }) => (
+const Corner: React.FC<Props> = (props) => (
   <svg
     width="10"
     height="10"
     viewBox="0 0 10 10"
-    className={className}
-    transform={transform}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
   >
-    <rect width="10" height="1" fill="currentColor" />
-    <rect width="1" height="10" fill="currentColor" />
+    <rect
+      x="0"
+      y="0"
+      width="10"
+      height="10"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
   </svg>
+
+  // <svg
+  //   width="10"
+  //   height="10"
+  //   viewBox="0 0 10 10"
+  //   className={className}
+  //   transform={transform}
+  // >
+  //   <rect width="10" height="1" fill="currentColor" />
+  //   <rect width="1" height="10" fill="currentColor" />
+  // </svg>
 );
 
-const Expand: React.FC<Props> = () => (
-  <svg width="18" height="17" viewBox="0 0 18 17" fill="none">
+const Expand: React.FC<Props> = (props) => (
+  <svg width="18" height="17" viewBox="0 0 18 17" fill="none" {...props}>
     <path
       d="M3.33071 13.6693L3.65799 7.57299L9.42698 13.342L3.33071 13.6693Z"
       fill="currentcolor"

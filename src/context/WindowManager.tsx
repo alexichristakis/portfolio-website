@@ -1,9 +1,9 @@
 import { createContext, useCallback, useMemo, useRef, useState } from "react";
-import { Subject } from "rxjs";
+import { useMotionValue } from "framer-motion";
 
 import { Project as ProjectType } from "../types";
+import { useEvents, Events } from "../hooks";
 import { Window } from "../components";
-import { useMotionValue } from "framer-motion";
 
 export type WindowConfig = ProjectType & {
   id: string;
@@ -17,18 +17,11 @@ export type WindowEventHandlers = {
 };
 
 type WindowManagerState = {
-  events: Subject<WindowManagerEventPayload>;
   registerWindow: (window: WindowConfig) => void;
   openWindow: (id: string) => void;
   closeWindow: (id: string) => void;
+  subscribe: Events<WindowEvent>["subscribe"];
 };
-
-type WindowManagerEventPayload = {
-  type: WindowState;
-  id: string;
-};
-
-export const WindowManagerContext = createContext({} as WindowManagerState);
 
 export enum WindowState {
   OPEN,
@@ -36,15 +29,23 @@ export enum WindowState {
   CLOSED,
 }
 
+type WindowEvent = {
+  type: WindowState;
+  id: string;
+};
+
 type WindowMap = {
   [id: string]: WindowConfig & { state: WindowState };
 };
 
+export const WindowManagerContext = createContext({} as WindowManagerState);
+
 export const WindowManagerProvider: React.FC = ({ children }) => {
   const registeredWindows = useRef<WindowMap>({});
   const [openWindows, setOpenWindows] = useState<string[]>([]);
-  const events = useMemo(() => new Subject<WindowManagerEventPayload>(), []);
   const topWindow = useMotionValue("");
+
+  const { send, subscribe } = useEvents<WindowEvent>();
 
   const registerWindow = useCallback((window: WindowConfig) => {
     if (!registeredWindows.current[window.id]) {
@@ -56,7 +57,8 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
   }, []);
 
   const handleWindowOpen = useCallback((id: string) => {
-    events.next({ id, type: WindowState.OPEN });
+    send({ type: WindowState.OPEN, id });
+
     registeredWindows.current[id].state = WindowState.OPEN;
     setOpenWindows((prev) => [...prev, id]);
   }, []);
@@ -72,19 +74,19 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
   }, []);
 
   const requestClose = useCallback((id: string) => {
-    events.next({ id, type: WindowState.CLOSING });
+    send({ type: WindowState.CLOSING, id });
     registeredWindows.current[id].state = WindowState.CLOSING;
   }, []);
 
   const closeWindow = useCallback((id: string) => {
-    events.next({ id, type: WindowState.CLOSED });
+    send({ type: WindowState.CLOSED, id });
     registeredWindows.current[id].state = WindowState.CLOSED;
     setOpenWindows((prev) => prev.filter((window) => window !== id));
   }, []);
 
   const state = useMemo(
     () => ({
-      events,
+      subscribe,
       openWindow,
       closeWindow,
       registerWindow,

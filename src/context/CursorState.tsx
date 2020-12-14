@@ -2,6 +2,7 @@ import { createContext, useCallback, useRef, useEffect } from "react";
 import { MotionValue, useMotionValue } from "framer-motion";
 
 import { CURSOR_ZINDEX } from "../lib";
+import { Events, useEvents } from "../hooks";
 
 export type CursorMoveHandlers = {
   handler: {
@@ -10,17 +11,16 @@ export type CursorMoveHandlers = {
   };
 };
 
-export type CursorEventPayload = {
+export enum CursorEventType {
+  "LOCK",
+  "UNLOCK",
+}
+
+export type CursorEvent = {
+  type: CursorEventType;
   position: { x: number; y: number };
   rect: DOMRect | null;
   scaleFactor: number | null;
-};
-
-type CursorEventType = "LOCK" | "UNLOCK";
-export type CursorEventListenerCallback = (payload: CursorEventPayload) => void;
-export type CursorEventListener = {
-  type: CursorEventType;
-  cb: CursorEventListenerCallback;
 };
 
 export type CursorPositionState = {
@@ -32,8 +32,7 @@ export type CursorPositionState = {
   lockedRect: React.RefObject<DOMRect>;
   lock: (rect: DOMRect, scale?: number, zIndex?: number) => void;
   unlock: () => void;
-  subscribeListener: (config: CursorEventListener) => void;
-  unsubscribeListener: (cb?: CursorEventListenerCallback) => void;
+  subscribe: Events<CursorEvent>["subscribe"];
 };
 
 export const CursorStateContext = createContext({} as CursorPositionState);
@@ -43,11 +42,12 @@ export const CursorStateProvider: React.FC = ({ children }) => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lockedRect = useRef<DOMRect | null>(null);
   const scaleFactor = useRef<number>(1);
-  const eventCallbacks = useRef<CursorEventListener[]>([]);
   const zIndex = useMotionValue(CURSOR_ZINDEX);
   const isLocked = useMotionValue(false);
   const x = useMotionValue(-10);
   const y = useMotionValue(-10);
+
+  const { send, subscribe } = useEvents<CursorEvent>();
 
   useEffect(() => {
     const handleMouseMove = ({ clientX, clientY }: MouseEvent) => {
@@ -59,6 +59,13 @@ export const CursorStateProvider: React.FC = ({ children }) => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  const makeEventPayload = (type: CursorEventType): CursorEvent => ({
+    type,
+    position: { x: x.get(), y: y.get() },
+    rect: lockedRect.current,
+    scaleFactor: scaleFactor.current,
+  });
+
   const lock = useCallback(
     (rect: DOMRect, scale?: number, lockedElementZIndex?: number) => {
       if (scale) scaleFactor.current = scale;
@@ -69,13 +76,13 @@ export const CursorStateProvider: React.FC = ({ children }) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       cursorRef.current?.classList.add("locked");
 
-      updateListeners("LOCK");
+      send(makeEventPayload(CursorEventType.LOCK));
     },
     []
   );
 
   const unlock = useCallback(() => {
-    updateListeners("UNLOCK");
+    send(makeEventPayload(CursorEventType.UNLOCK));
 
     lockedRect.current = null;
     scaleFactor.current = 1;
@@ -87,33 +94,11 @@ export const CursorStateProvider: React.FC = ({ children }) => {
     }, 200);
   }, []);
 
-  // listener handling
-  const updateListeners = useCallback((type: CursorEventType) => {
-    const payload = {
-      position: { x: x.get(), y: y.get() },
-      rect: lockedRect.current,
-      scaleFactor: scaleFactor.current,
-    };
-
-    eventCallbacks.current.forEach((listener) => {
-      if (listener.type === type) {
-        listener.cb(payload);
-      }
-    });
-  }, []);
-
-  const subscribeListener = (listener: CursorEventListener) =>
-    eventCallbacks.current.push(listener);
-
-  const unsubscribeListener = (cb?: CursorEventListenerCallback) =>
-    (eventCallbacks.current = eventCallbacks.current.filter(
-      (listener) => listener.cb !== cb
-    ));
-
   return (
     <CursorStateContext.Provider
       value={{
         position: { x, y },
+        subscribe,
         cursorRef,
         lockedRect,
         scaleFactor,
@@ -121,8 +106,6 @@ export const CursorStateProvider: React.FC = ({ children }) => {
         isLocked,
         lock,
         unlock,
-        subscribeListener,
-        unsubscribeListener,
       }}
     >
       {children}

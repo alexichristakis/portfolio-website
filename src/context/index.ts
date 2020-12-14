@@ -2,7 +2,11 @@ export {
   FocusedProjectContext,
   FocusedProjectProvider,
 } from "./FocusedProject";
-export { CursorStateProvider, CursorStateContext } from "./CursorState";
+export {
+  CursorStateProvider,
+  CursorEventType,
+  CursorStateContext,
+} from "./CursorState";
 export {
   WindowManagerProvider,
   WindowState,
@@ -10,9 +14,5 @@ export {
 } from "./WindowManager";
 
 // Types
-export type {
-  CursorEventPayload,
-  CursorEventListener,
-  CursorEventListenerCallback,
-} from "./CursorState";
+export type { CursorEvent } from "./CursorState";
 export type { WindowConfig, WindowEventHandlers } from "./WindowManager";
