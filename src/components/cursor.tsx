@@ -1,135 +1,134 @@
-import React, { useRef } from "react";
-import styled from "styled-components";
+import { useRef } from "react";
+import { animate, motion, useMotionValue, useTransform } from "framer-motion";
+import type { Tween, Point2D } from "framer-motion";
 
-import {
-  setStyleProperties,
-  DEFAULT_CURSOR_SIZE,
-  LOCKED_CURSOR_BUFFER,
-} from "../lib";
 import { useCursorEvents } from "../hooks";
+import "./cursor.scss";
 
-const CursorContent = styled.div``;
+const CURSOR_SIZE = 10;
+const ClassPrefix = "cursor";
 
-const StyledCursor = styled.div`
-  pointer-events: none;
-  transform: translate(-50%, -50%) scale(var(--scale));
-  transition-property: width, height;
-  width: var(--width);
-  height: var(--height);
-  left: var(--left);
-  top: var(--top);
+const offsetTransition: Tween = {
+  type: "tween",
+  ease: "easeOut",
+  duration: 0.15,
+};
 
-  --top: -${DEFAULT_CURSOR_SIZE}px;
-  --left: -${DEFAULT_CURSOR_SIZE}px;
-  --width: ${DEFAULT_CURSOR_SIZE}px;
-  --height: ${DEFAULT_CURSOR_SIZE}px;
-  --scale: 1;
-  --translateX: 0;
-  --translateY: 0;
+const sizeTransition: Tween = {
+  type: "tween",
+  ease: "easeOut",
+  duration: 0.2,
+};
 
-  &,
-  ${CursorContent} {
-    position: absolute;
-    transition-duration: 250ms;
-    transition-timing-function: ease-out;
-  }
+/* some utility functions */
+const getDiffX = (rect: DOMRect, x: number) => {
+  const { left, width } = rect;
+  return left + width / 2 - x;
+};
 
-  ${CursorContent} {
-    background-color: #000;
-    border-radius: 0.6em;
-    bottom: 0;
-    left: 0;
-    opacity: 0.3;
-    right: 0;
-    top: 0;
-    opacity: 0.3;
-    transform: translate(var(--translateX), var(--translateY));
-    transition-property: opacity;
-  }
+const getDiffY = (rect: DOMRect, y: number) => {
+  const { top, height } = rect;
+  return top + height / 2 - y;
+};
 
-  &.locked {
-    transition-property: width, height, left, top;
-    ${CursorContent} {
-      background-color: transparent;
-      border: solid #000 5px;
-      opacity: 0.06;
-    }
-  }
-`;
+const getDiff = (rect: DOMRect, { x, y }: Point2D): Point2D => ({
+  x: getDiffX(rect, x),
+  y: getDiffY(rect, y),
+});
+
+const getCenter = (rect: DOMRect): Point2D => ({
+  x: rect.left + rect.width / 2,
+  y: rect.top + rect.height / 2,
+});
 
 export const Cursor: React.FC = () => {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const unlockTimeout = useRef<number | undefined>(undefined);
+  const targetWasDragged = useRef(false);
+  const offsetX = useMotionValue(0);
+  const offsetY = useMotionValue(0);
+  const width = useMotionValue(CURSOR_SIZE);
+  const height = useMotionValue(CURSOR_SIZE);
 
-  useCursorEvents({
-    onMove: (payload) => {
-      const { x, y } = payload.position;
+  const { position, pressed, target } = useCursorEvents({
+    onLock: ({ target }) => {
+      targetWasDragged.current = false;
+      const { rect, scale = 1 } = target;
 
-      if (!payload.isLocked) {
-        requestAnimationFrame(() => {
-          setStyleProperties(cursorRef.current, {
-            "--top": `${y}px`,
-            "--left": `${x}px`,
-          });
-        });
-      } else {
-        const { rect, target } = payload;
-        const { height, top, width, left } = rect;
+      const diff = getDiff(rect, { x: x.get(), y: y.get() });
+      offsetX.set(offsetX.get() - diff.x);
+      offsetY.set(offsetY.get() - diff.y);
 
-        const halfHeight = height / 2;
-        const topOffset = (y - top - halfHeight) / halfHeight;
-
-        const halfWidth = width / 2;
-        const leftOffset = (x - left - halfWidth) / halfWidth;
-
-        requestAnimationFrame(() => {
-          setStyleProperties(cursorRef.current, {
-            "--translateX": `${leftOffset * 3}px`,
-            "--translateY": `${topOffset * 3}px`,
-          });
-
-          setStyleProperties(target, {
-            "--translateX": `${leftOffset * 6}px`,
-            "--translateY": `${topOffset * 4}px`,
-          });
-        });
-      }
+      animate(offsetX, 0, offsetTransition);
+      animate(offsetY, 0, offsetTransition);
+      animate(height, rect.height * (scale + 0.1), sizeTransition);
+      animate(width, rect.width * (scale + 0.1), sizeTransition);
     },
-    onLock: (payload) => {
-      const { rect } = payload;
-      const { top, left, height, width } = rect;
+    onUnlock: ({ target }) => {
+      targetWasDragged.current = false;
+      const { rect } = target;
 
-      clearTimeout(unlockTimeout.current);
+      const diff = getDiff(rect, { x: x.get(), y: y.get() });
+      offsetX.set(offsetX.get() + diff.x);
+      offsetY.set(offsetY.get() + diff.y);
 
-      requestAnimationFrame(() => {
-        cursorRef.current?.classList.add("locked");
-        setStyleProperties(cursorRef.current, {
-          "--top": `${top + height / 2}px`,
-          "--left": `${left + width / 2}px`,
-          "--width": `${width + 2 * LOCKED_CURSOR_BUFFER}px`,
-          "--height": `${height + 2 * LOCKED_CURSOR_BUFFER}px`,
-        });
-      });
-    },
-    onUnlock: () => {
-      unlockTimeout.current = setTimeout(() => {
-        cursorRef.current?.classList.remove("locked");
-      }, 250);
-
-      requestAnimationFrame(() => {
-        setStyleProperties(cursorRef.current, {
-          "--width": `${DEFAULT_CURSOR_SIZE}px`,
-          "--height": `${DEFAULT_CURSOR_SIZE}px`,
-          "--translateX": "0",
-          "--translateY": "0",
-        });
-      });
+      animate(offsetX, 0, offsetTransition);
+      animate(offsetY, 0, offsetTransition);
+      animate(height, CURSOR_SIZE, sizeTransition);
+      animate(width, CURSOR_SIZE, sizeTransition);
     },
   });
 
+  const { x, y } = position;
+
+  const transform = useTransform(
+    // @ts-ignore
+    [x, y, offsetX, offsetY],
+    ([prevX, prevY, offsetX, offsetY]: number[]) => {
+      const rect = target.current?.rect;
+      const throttle = target.current?.throttle ?? true;
+      const draggable = target.current?.draggable;
+      const isPressed = !!pressed.current;
+
+      // initial state: current position
+      let x = prevX;
+      let y = prevY;
+
+      // if currently locked to target
+      if (rect) {
+        const { left, width, top, height } = rect;
+        const center = getCenter(rect);
+
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+
+        const leftOffset = (x - left - halfWidth) / halfWidth;
+        const topOffset = (y - top - halfHeight) / halfHeight;
+
+        x = center.x;
+        y = center.y;
+
+        // add throttle
+        if (throttle) {
+          x += leftOffset * 4;
+          y += topOffset * 4;
+        } else if (draggable && (isPressed || targetWasDragged.current)) {
+          targetWasDragged.current = true;
+
+          // if pressed check for direction lock
+          if (draggable.includes("y")) y = prevY;
+          if (draggable.includes("x")) x = prevX;
+        }
+      }
+
+      return `translate(${x + offsetX}px, ${y + offsetY}px)`;
+    }
+  );
+
   return (
-    <StyledCursor ref={cursorRef}>
-      <CursorContent />
-    </StyledCursor>
+    <motion.div
+      className={`${ClassPrefix}__container`}
+      style={{ transform, width, height }}
+    >
+      <motion.div className={`${ClassPrefix}__content`} />
+    </motion.div>
   );
 };

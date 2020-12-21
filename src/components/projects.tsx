@@ -1,31 +1,97 @@
-import React from "react";
-import styled from "styled-components";
+import cn from "classnames";
 
-import { Project } from "./project";
-import { BOX_SIZE } from "../lib";
+import { Icons, ProjectAssets } from "../assets";
+import { Project } from "../types";
 
-const Container = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, ${BOX_SIZE}px);
-  grid-template-rows: repeat(3, ${BOX_SIZE}px) auto;
-  grid-column-gap: ${({ theme }) => theme.space[64]}px;
-  grid-row-gap: ${({ theme }) => theme.space[64]}px;
-`;
+import Gallery from "./gallery";
+import "./projects.scss";
 
-export const Projects: React.FC = () => {
-  return (
-    <Container>
-      <Project />
-      <Project />
-      <Project />
+const ClassPrefix = "project";
 
-      <Project />
-      <Project />
-      <Project />
+const Container: React.FC = ({ children }) => (
+  <div className={`${ClassPrefix}__container`}>{children}</div>
+);
 
-      <Project />
-      <Project />
-      <Project />
-    </Container>
-  );
-};
+export const projects: Project[] = [
+  {
+    title: "resume",
+    icon: Icons.resume,
+    aspectRatio: 1.294117647,
+    color: "",
+    content: (
+      <img
+        className="resume"
+        alt="alexi-christakis-resume"
+        src={ProjectAssets.resume}
+      />
+    ),
+  },
+  {
+    title: "paint.party",
+    icon: Icons.paintParty,
+    color: "",
+    content: (
+      <Gallery
+        images={[
+          { src: ProjectAssets.paintpartyCanvases, caption: "canvases" },
+          { src: ProjectAssets.paintpartyColorEditor, caption: "canvases" },
+          { src: ProjectAssets.paintpartyDraw, caption: "canvases" },
+          { src: ProjectAssets.paintpartyGallery, caption: "canvases" },
+          { src: ProjectAssets.paintpartyCanvases, caption: "canvases" },
+          { src: ProjectAssets.paintpartyColorEditor, caption: "canvases" },
+          { src: ProjectAssets.paintpartyDraw, caption: "canvases" },
+          { src: ProjectAssets.paintpartyGallery, caption: "canvases" },
+        ]}
+      />
+    ),
+    link: "https://paintparty.io",
+  },
+  {
+    title: "unexpected",
+    icon: Icons.unexpected,
+    color: "",
+    content: <div>hello!</div>,
+  },
+  {
+    title: "screentime",
+    color: "",
+    content: <div>hello!</div>,
+    icon: Icons.screentime,
+    link: "https://screentime-525d7.firebaseapp.com",
+  },
+  {
+    title: "accordion",
+    icon: Icons.accordion,
+    color: "",
+    content: <div>hello!</div>,
+  },
+  {
+    title: "photos",
+    color: "",
+    content: <div>hello!</div>,
+  },
+  {
+    title: "herd",
+    icon: Icons.herd,
+    color: "",
+    content: <div>hello!</div>,
+  },
+  {
+    title: "evently",
+    icon: Icons.evently,
+    color: "",
+    content: <div>hello!</div>,
+  },
+  {
+    title: "sesh",
+    icon: Icons.sesh,
+    color: "",
+    content: <div>hello!</div>,
+  },
+  {
+    title: "twitterlytics",
+    color: "",
+    content: <div>hello!</div>,
+    // icon: "",
+  },
+];

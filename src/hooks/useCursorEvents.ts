@@ -1,31 +1,27 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
+import { CursorStateContext, CursorEvent, CursorEventType } from "../context";
 
-import { CursorStateContext } from "../context";
-import {
-  CursorMoveEventPayload,
-  CursorLockEventPayload,
-  CursorUnlockEventPayload,
-  CursorEventType,
-} from "./useCursorState";
+type CursorEventHandlers = {
+  onLock?: (ev: CursorEvent) => void;
+  onUnlock?: (ev: CursorEvent) => void;
+};
 
-export const useCursorEvents = (handlers: {
-  onMove?: (payload: CursorMoveEventPayload) => void;
-  onLock?: (payload: CursorLockEventPayload) => void;
-  onUnlock?: (payload: CursorUnlockEventPayload) => void;
-}) => {
-  const { emitter } = useContext(CursorStateContext);
+export const useCursorEvents = (handlers: CursorEventHandlers) => {
+  const { subscribe, ...rest } = useContext(CursorStateContext);
 
-  emitter.subscribe({
-    next: (payload) => {
-      if (payload.type === CursorEventType.LOCK) {
-        handlers.onLock?.(payload);
-      } else if (payload.type === CursorEventType.UNLOCK) {
-        handlers.onUnlock?.(payload);
-      } else if (payload.type === CursorEventType.MOVE) {
-        handlers.onMove?.(payload);
+  useEffect(() => {
+    const unsubscribe = subscribe(({ type, target, position }) => {
+      if (type === CursorEventType.LOCK) {
+        handlers.onLock?.({ type, target, position });
       }
-    },
-  });
 
-  return () => emitter.unsubscribe();
+      if (type === CursorEventType.UNLOCK) {
+        handlers.onUnlock?.({ type, target, position });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  return rest;
 };

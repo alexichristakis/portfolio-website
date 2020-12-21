@@ -1,7 +1,3 @@
-export { Footer } from "./footer";
-export { Projects } from "./projects";
-export { Project } from "./project";
-export { ProjectDetail } from "./projectDetail";
+export { ProjectIcons } from "./projectIcons";
 export { Cursor } from "./cursor";
-export { Info } from "./info";
-export { Slide } from "./slide";
+export { Window } from "./window";
