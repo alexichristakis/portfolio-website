@@ -1,5 +1,5 @@
-import { createContext, useCallback, useRef, useEffect } from "react";
-import { MotionValue, useMotionValue } from "framer-motion";
+import { createContext, useRef, useEffect } from "react";
+import { MotionValue, Point2D, useMotionValue } from "framer-motion";
 
 import { CURSOR_ZINDEX } from "../lib";
 import { Events, useEvents } from "../hooks";
@@ -16,34 +16,37 @@ export enum CursorEventType {
   "UNLOCK",
 }
 
+export type CursorTargetConfig = {
+  scale?: number;
+  zIndex?: number;
+  throttle?: boolean;
+  draggable?: "x" | "y" | "xy";
+};
+
+export type CursorTarget = CursorTargetConfig & {
+  rect: DOMRect;
+};
+
 export type CursorEvent = {
   type: CursorEventType;
+  target: CursorTarget;
   position: { x: number; y: number };
-  rect: DOMRect | null;
-  scaleFactor: number | null;
 };
 
 export type CursorPositionState = {
   position: { x: MotionValue<number>; y: MotionValue<number> };
-  isLocked: MotionValue<boolean>;
-  zIndex: MotionValue<number>;
-  cursorRef: React.RefObject<HTMLDivElement>;
-  scaleFactor: React.RefObject<number>;
-  lockedRect: React.RefObject<DOMRect>;
-  lock: (rect: DOMRect, scale?: number, zIndex?: number) => void;
-  unlock: () => void;
+  target: React.RefObject<CursorTarget>;
+  pressed: React.RefObject<boolean>;
+  lock: (target: CursorTarget) => void;
+  unlock: (target: CursorTarget) => void;
   subscribe: Events<CursorEvent>["subscribe"];
 };
 
 export const CursorStateContext = createContext({} as CursorPositionState);
 
 export const CursorStateProvider: React.FC = ({ children }) => {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lockedRect = useRef<DOMRect | null>(null);
-  const scaleFactor = useRef<number>(1);
-  const zIndex = useMotionValue(CURSOR_ZINDEX);
-  const isLocked = useMotionValue(false);
+  const pressed = useRef(false);
+  const target = useRef<CursorTarget | null>(null);
   const x = useMotionValue(-10);
   const y = useMotionValue(-10);
 
@@ -55,58 +58,50 @@ export const CursorStateProvider: React.FC = ({ children }) => {
       y.set(clientY);
     };
 
+    const handleMouseDown = (ev: MouseEvent) => {
+      pressed.current = true;
+    };
+
+    const handleMouseUp = (ev: MouseEvent) => {
+      pressed.current = false;
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
   }, []);
 
-  const makeEventPayload = (type: CursorEventType): CursorEvent => ({
-    type,
-    position: { x: x.get(), y: y.get() },
-    rect: lockedRect.current,
-    scaleFactor: scaleFactor.current,
-  });
+  const getCurrentPosition = (): Point2D => ({ x: x.get(), y: y.get() });
 
-  const lock = useCallback(
-    (rect: DOMRect, scale?: number, lockedElementZIndex?: number) => {
-      if (scale) scaleFactor.current = scale;
-      if (lockedElementZIndex) zIndex.set(lockedElementZIndex - 1);
-      lockedRect.current = rect;
-      isLocked.set(true);
+  const lock = (lockedTarget: CursorTarget) => {
+    if (!(pressed.current && target.current)) {
+      target.current = lockedTarget;
+      console.log("LOCK");
+      send({
+        type: CursorEventType.LOCK,
+        target: lockedTarget,
+        position: getCurrentPosition(),
+      });
+    }
+  };
 
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      cursorRef.current?.classList.add("locked");
-
-      send(makeEventPayload(CursorEventType.LOCK));
-    },
-    []
-  );
-
-  const unlock = useCallback(() => {
-    send(makeEventPayload(CursorEventType.UNLOCK));
-
-    lockedRect.current = null;
-    scaleFactor.current = 1;
-    isLocked.set(false);
-
-    timeoutRef.current = setTimeout(() => {
-      cursorRef.current?.classList.remove("locked");
-      zIndex.set(CURSOR_ZINDEX);
-    }, 200);
-  }, []);
+  const unlock = (lockedTarget: CursorTarget) => {
+    target.current = null;
+    send({
+      type: CursorEventType.UNLOCK,
+      target: lockedTarget,
+      position: getCurrentPosition(),
+    });
+  };
 
   return (
     <CursorStateContext.Provider
-      value={{
-        position: { x, y },
-        subscribe,
-        cursorRef,
-        lockedRect,
-        scaleFactor,
-        zIndex,
-        isLocked,
-        lock,
-        unlock,
-      }}
+      value={{ position: { x, y }, pressed, subscribe, target, lock, unlock }}
     >
       {children}
     </CursorStateContext.Provider>

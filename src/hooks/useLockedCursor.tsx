@@ -1,28 +1,26 @@
-import { useCallback, useContext, useEffect } from "react";
-import { useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useCallback, useContext, useEffect, useRef } from "react";
+import { useMotionValue, useSpring } from "framer-motion";
 
-import { CursorStateContext } from "../context";
-import { useToggle } from "./useToggle";
-import { useTranslate } from "./useTranslate";
+import {
+  CursorStateContext,
+  CursorTarget,
+  CursorTargetConfig,
+} from "../context";
 
 type UseLockedCursorHandlers = {
   onMouseEnter?: (e: MouseEvent) => void;
-  onMouseLeave?: (e: MouseEvent) => void;
+  onMouseLeave?: (e?: MouseEvent) => void;
 };
 
 export const useLockedCursor = (
   ref: React.RefObject<HTMLElement>,
-  config: {
-    zIndex?: number;
-    scale?: number;
-    handlers?: UseLockedCursorHandlers;
-  }
+  config: CursorTargetConfig,
+  handlers?: UseLockedCursorHandlers
 ) => {
-  const { handlers } = config;
-  // const isLocked = useToggle(false);
+  const lockedTarget = useRef<CursorTarget | null>(null);
   const zIndex = useMotionValue(0);
   const scale = useSpring(1);
-  const { position, lockedRect, lock, unlock } = useContext(CursorStateContext);
+  const { position, pressed, lock, unlock } = useContext(CursorStateContext);
 
   // const xOffset = useTransform(position.x, (x) => {
   //   if (isLocked.value && lockedRect.current) {
@@ -49,21 +47,37 @@ export const useLockedCursor = (
   // });
 
   const handleMouseEnter = useCallback((ev: MouseEvent) => {
-    // isLocked.setTrue();
     const rect = ref.current?.getBoundingClientRect();
-    if (rect) lock(rect, config.scale, config.zIndex);
-    if (config.zIndex) zIndex.set(config.zIndex);
-    if (config.scale) scale.set(config.scale);
+    if (rect) {
+      const target: CursorTarget = { rect, ...config };
+      lockedTarget.current = target;
+      lock(target);
+      scale.set(config.scale);
+    }
+
     handlers?.onMouseEnter?.(ev);
   }, []);
 
   const handleMouseLeave = useCallback((ev?: MouseEvent) => {
-    // isLocked.setFalse();
-    unlock();
+    const target = lockedTarget.current;
+    if (
+      target &&
+      (!target.draggable || (target.draggable && !pressed.current))
+    ) {
+      // try to get the new element location if available
+      const rect = ref.current?.getBoundingClientRect();
 
-    scale.set(1);
-    zIndex.set(0);
-    handlers?.onMouseLeave?.(ev!);
+      unlock({
+        ...target,
+        rect: rect ?? target.rect,
+      });
+
+      // reset state
+      lockedTarget.current = null;
+      scale.set(1);
+    }
+
+    handlers?.onMouseLeave?.(ev);
   }, []);
 
   useEffect(() => {
@@ -89,7 +103,7 @@ export const useLockedCursor = (
   // });
 
   return {
-    cursorPosition: position,
+    // cursorPosition: position,
     // isLocked: isLocked.value,
     style: {
       // transform,

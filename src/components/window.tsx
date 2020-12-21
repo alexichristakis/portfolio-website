@@ -168,25 +168,11 @@ export const Window: React.FC<WindowProps> = memo(
       });
     }, []);
 
-    // const handleOnClickExpand = useCallback(() => {
-    //   if (
-    //     width.get() === window.innerWidth &&
-    //     height.get() === window.innerHeight
-    //   ) {
-    //     animate(width, WINDOW_WIDTH, TWEEN_ANIMATION);
-    //     animate(height, WINDOW_HEIGHT, TWEEN_ANIMATION);
-    //   } else {
-    //     animate(width, window.innerWidth, TWEEN_ANIMATION);
-    //     animate(height, window.innerHeight, TWEEN_ANIMATION);
-    //     animate(offsetX, 0, TWEEN_ANIMATION);
-    //     animate(offsetY, 0, TWEEN_ANIMATION);
-    //   }
-    // }, []);
-
     const Prefix = "window";
-    const transform = useMotionTemplate`\
-    translate(${offsetX}px, ${offsetY}px)\
-    scale(${scaleX}, ${scaleY})`;
+    const transform = useMotionTemplate`
+      translate(${offsetX}px, ${offsetY}px)
+      scale(${scaleX}, ${scaleY})
+    `;
 
     const iconOpacity = useTransform(
       animation,
@@ -195,7 +181,6 @@ export const Window: React.FC<WindowProps> = memo(
     );
 
     const contentOpacity = useTransform(iconOpacity, [0, 1], [1, 0]);
-
     const backgroundOpacity = useTransform(animation, [0, 0.5, 1], [0, 1, 0]);
 
     const boxShadowSpread = useTransform(animation, [0, 1], [0, 5]);

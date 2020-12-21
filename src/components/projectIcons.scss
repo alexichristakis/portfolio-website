@@ -1,4 +1,5 @@
 .projects {
+  max-width: 1250px;
   padding: 30px;
   display: flex;
   flex-direction: row;
@@ -13,11 +14,12 @@
   justify-content: flex-end;
   align-items: center;
 
+  $project-size: 175px;
   &__icon-container {
-    width: 100px;
-    height: 100px;
+    width: $project-size;
+    height: $project-size;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: 5px;
 
     img {
       max-width: 100%;

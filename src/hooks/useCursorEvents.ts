@@ -10,13 +10,13 @@ export const useCursorEvents = (handlers: CursorEventHandlers) => {
   const { subscribe, ...rest } = useContext(CursorStateContext);
 
   useEffect(() => {
-    const unsubscribe = subscribe(({ type, ...rest }) => {
+    const unsubscribe = subscribe(({ type, target, position }) => {
       if (type === CursorEventType.LOCK) {
-        handlers.onLock?.({ type, ...rest });
+        handlers.onLock?.({ type, target, position });
       }
 
       if (type === CursorEventType.UNLOCK) {
-        handlers.onUnlock?.({ type, ...rest });
+        handlers.onUnlock?.({ type, target, position });
       }
     });
 

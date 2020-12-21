@@ -1,5 +1,6 @@
 .cursor {
   &__container {
+    z-index: 100;
     pointer-events: none;
     top: 0;
     left: 0;
@@ -11,18 +12,14 @@
 
     .cursor__content {
       transform: translate(-50%, -50%);
+      // border: 5px solid #000;
       background: #000;
       opacity: 0.3;
-      border-radius: 0.8em;
+      border-radius: 0.5em;
       bottom: 0;
       left: 0;
       right: 0;
       top: 0;
-    }
-
-    &.locked {
-      transition: transform 100ms ease-out;
-      border-radius: 10%;
     }
   }
 }

@@ -6,6 +6,9 @@
   z-index: 0;
 
   &__box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 2px;
     bottom: 0;
     left: 0;
@@ -32,15 +35,14 @@
     flex-direction: row;
     color: white;
     background: var(--blue);
-    border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
-    padding: 2px 6px 0 6px;
-    padding-bottom: 4px;
+    border-radius: 4px;
+    padding: 2px 8px 4px 8px;
+    margin-bottom: 4px;
   }
 }
 
 .resize-control {
-  $target-size: 16px;
+  $target-size: 15px;
   $size: 10px;
   $center: calc(50% - var(--size));
 
@@ -51,6 +53,8 @@
 
   &__rail {
     $size: $target-size;
+    $max-size: max(50px, calc(100% - 200px));
+
     pointer-events: auto;
     position: absolute;
     transition: inherit;
@@ -58,29 +62,25 @@
 
     &-n {
       top: -$size / 2;
-      left: 0;
       height: $size;
-      width: 100%;
+      width: $max-size;
     }
 
     &-e {
-      top: 0;
       right: -$size / 2;
-      height: 100%;
+      height: $max-size;
       width: $size;
     }
 
     &-s {
       bottom: -$size / 2;
-      left: 0;
       height: $size;
-      width: 100%;
+      width: $max-size;
     }
 
     &-w {
-      top: 0;
       left: -$size / 2;
-      height: 100%;
+      height: $max-size;
       width: $size;
     }
   }
@@ -93,13 +93,13 @@
     height: $size;
     width: $size;
     margin: -$size / 2;
-    pointer-events: auto;
     position: absolute;
     z-index: 4;
 
     &::after {
       content: "";
       position: absolute;
+      pointer-events: auto;
       top: 50%;
       left: 50%;
       width: $target-size;
