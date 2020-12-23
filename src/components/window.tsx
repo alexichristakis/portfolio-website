@@ -1,21 +1,13 @@
-import { useCallback, useLayoutEffect, memo, useRef } from "react";
-import {
-  animate,
-  motion,
-  MotionValue,
-  PanInfo,
-  useMotionTemplate,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
+import { useCallback, useEffect, memo, useRef } from "react";
+import { animated, useSpring, to } from "react-spring";
+import { useGesture } from "react-use-gesture";
 
-import { TWEEN_ANIMATION, WINDOW_ZINDEX } from "../lib";
+import { useSkewAnimation } from "../hooks";
+import { SVG } from "../assets/icons";
 import { WindowConfig } from "../context";
-import BoundingBox, { hasDirection, Direction } from "./boundingBox";
 import "./window.scss";
 
 interface WindowProps extends WindowConfig {
-  topWindow: MotionValue<string>;
   onRequestClose: () => void;
   destroyWindow: () => void;
 }
@@ -25,7 +17,6 @@ const WINDOW_HEIGHT = 400;
 
 export const Window: React.FC<WindowProps> = memo(
   ({
-    topWindow,
     id,
     onRequestClose,
     destroyWindow,
@@ -35,191 +26,143 @@ export const Window: React.FC<WindowProps> = memo(
     aspectRatio,
     icon,
   }) => {
+    const contentRef = useRef<HTMLDivElement>(null);
     const windowRef = useRef<HTMLDivElement>(null);
-    const boundingBoxOpacityTimeout = useRef<NodeJS.Timeout | null>(null);
-    const isDragging = useRef(false);
     const isClosing = useRef(false);
-    const animation = useMotionValue(0);
-
-    const width = useMotionValue(WINDOW_WIDTH);
-    const height = useMotionValue(
-      aspectRatio ? WINDOW_WIDTH * aspectRatio : WINDOW_HEIGHT
-    );
-    const boundingBoxOpacity = useMotionValue(0);
-
-    const zIndex = useTransform(topWindow, (windowId) =>
-      windowId === id ? WINDOW_ZINDEX + 1 : WINDOW_ZINDEX
-    );
 
     const getSourceRect = () => sourceRef.current?.getBoundingClientRect()!;
 
+    const initialHeight = aspectRatio
+      ? WINDOW_WIDTH * aspectRatio
+      : WINDOW_HEIGHT;
+    const initialWidth = WINDOW_WIDTH;
     const initialRect = getSourceRect();
-    const offsetX = useMotionValue(initialRect.left);
-    const offsetY = useMotionValue(initialRect.top);
-    const scaleX = useMotionValue(initialRect.width / width.get());
-    const scaleY = useMotionValue(initialRect.height / height.get());
 
-    useLayoutEffect(() => {
-      const initialX = (window.innerWidth - WINDOW_WIDTH) / 2;
-      const initialY = (window.innerHeight - WINDOW_HEIGHT) / 2;
+    const [
+      { openAmount, width, height, scaleX, scaleY, offsetX, offsetY },
+      set,
+    ] = useSpring(() => ({
+      openAmount: 0,
+      offsetX: initialRect.left,
+      offsetY: initialRect.top,
+      scaleX: initialRect.width / initialWidth,
+      scaleY: initialRect.height / initialHeight,
+      width: initialWidth,
+      height: initialHeight,
+    }));
 
-      animate(animation, 1, TWEEN_ANIMATION);
-      animate(offsetX, initialX, TWEEN_ANIMATION);
-      animate(offsetY, initialY, TWEEN_ANIMATION);
-      animate(scaleX, 1, TWEEN_ANIMATION);
-      animate(scaleY, 1, TWEEN_ANIMATION);
+    useEffect(() => {
+      set({
+        openAmount: 1,
+        offsetX: (window.innerWidth - width.get()) / 2,
+        offsetY: (window.innerHeight - height.get()) / 2,
+        scaleX: 1,
+        scaleY: 1,
+      });
     }, []);
 
-    const flashBoundingBox = () => {
-      if (!isClosing.current) {
-        if (boundingBoxOpacityTimeout.current) {
-          clearTimeout(boundingBoxOpacityTimeout.current);
-        }
+    const { resetRotation, rotation, onMove, onHover } = useSkewAnimation({
+      ref: windowRef,
+      throttle: 7,
+    });
 
-        animate(boundingBoxOpacity, 1, TWEEN_ANIMATION);
-        boundingBoxOpacityTimeout.current = setTimeout(() => {
-          animate(boundingBoxOpacity, 0, TWEEN_ANIMATION);
-        }, 1000);
-      }
-    };
+    useGesture(
+      {
+        onMove: (ev) => {
+          if (!isClosing.current) {
+            onMove(ev);
+          }
+        },
+        onHover,
+        onDrag: ({ first, delta: [x, y] }) => {
+          if (first) {
+            resetRotation();
+          }
 
-    const handleOnMouseMove = () => {
-      if (!isDragging.current) {
-        flashBoundingBox();
-      }
-    };
+          const nextOffsetX = offsetX.get() + x;
+          const nextOffsetY = offsetY.get() + y;
+          const currentWidth = width.get();
+          const currentHeight = height.get();
 
-    const handleOnDragEnd = () => {
-      isDragging.current = false;
-      flashBoundingBox();
-    };
+          if (
+            currentWidth + nextOffsetX < window.innerWidth &&
+            nextOffsetX > 0
+          ) {
+            offsetX.set(nextOffsetX);
+          }
 
-    const handleOnDrag = useCallback((ev: MouseEvent, info: PanInfo) => {
-      isDragging.current = true;
-      if (boundingBoxOpacityTimeout.current) {
-        clearTimeout(boundingBoxOpacityTimeout.current);
-      }
-
-      const { x, y } = info.delta;
-      const nextOffsetX = offsetX.get() + x;
-      const nextOffsetY = offsetY.get() + y;
-      const currentWidth = width.get();
-      const currentHeight = height.get();
-
-      if (currentWidth + nextOffsetX < window.innerWidth && nextOffsetX > 0) {
-        offsetX.set(nextOffsetX);
-      }
-
-      if (currentHeight + nextOffsetY < window.innerHeight && nextOffsetY > 0) {
-        offsetY.set(nextOffsetY);
-      }
-    }, []);
-
-    const handleOnResize = useCallback(
-      (info: PanInfo, direction: Direction) => {
-        const { x, y } = info.delta;
-        let nextWidth = width.get();
-        let nextHeight = height.get();
-        let nextOffsetX = offsetX.get();
-        let nextOffsetY = offsetY.get();
-        if (hasDirection(direction, "n")) {
-          nextHeight -= y;
-          nextOffsetY += y;
-        }
-
-        if (hasDirection(direction, "e")) {
-          nextWidth += x;
-        }
-
-        if (hasDirection(direction, "s")) {
-          nextHeight += y;
-        }
-
-        if (hasDirection(direction, "w")) {
-          nextWidth -= x;
-          nextOffsetX += x;
-        }
-
-        width.set(nextWidth);
-        offsetX.set(nextOffsetX);
-        height.set(nextHeight);
-        offsetY.set(nextOffsetY);
+          if (
+            currentHeight + nextOffsetY < window.innerHeight &&
+            nextOffsetY > 0
+          ) {
+            offsetY.set(nextOffsetY);
+          }
+        },
       },
-      []
+      { domTarget: contentRef }
     );
 
     const handleOnClose = useCallback(() => {
-      onRequestClose();
       isClosing.current = true;
-      boundingBoxOpacity.set(0);
+
+      onRequestClose();
+      resetRotation();
       requestAnimationFrame(() => {
         const destRect = getSourceRect();
         if (destRect) {
           const scaleXDest = destRect.width / width.get();
           const scaleYDest = destRect.height / height.get();
 
-          animate(animation, 0, TWEEN_ANIMATION);
-          animate(offsetX, destRect.left, TWEEN_ANIMATION);
-          animate(offsetY, destRect.top, TWEEN_ANIMATION);
-          animate(scaleX, scaleXDest, TWEEN_ANIMATION);
-          animate(scaleY, scaleYDest, TWEEN_ANIMATION);
+          set({
+            openAmount: 0,
+            offsetX: destRect.left,
+            offsetY: destRect.top,
+            scaleX: scaleXDest,
+            scaleY: scaleYDest,
+          }).then(destroyWindow);
         }
-        setTimeout(destroyWindow, TWEEN_ANIMATION.duration * 1000);
       });
     }, []);
 
-    const Prefix = "window";
-    const transform = useMotionTemplate`
-      translate(${offsetX}px, ${offsetY}px)
-      scale(${scaleX}, ${scaleY})
-    `;
-
-    const iconOpacity = useTransform(
-      animation,
-      [0, 0.4, 0.75, 1],
-      [1, 0.4, 0, 0]
+    const containerTransform = to(
+      [offsetX, offsetY, scaleX, scaleY],
+      (x, y, scaleX, scaleY) =>
+        `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`
     );
 
-    const contentOpacity = useTransform(iconOpacity, [0, 1], [1, 0]);
-    const backgroundOpacity = useTransform(animation, [0, 0.5, 1], [0, 1, 0]);
+    const iconOpacity = openAmount.to({
+      range: [0, 0.75],
+      output: [1, 0],
+    });
 
-    const boxShadowSpread = useTransform(animation, [0, 1], [0, 5]);
-    const boxShadow = useMotionTemplate`0 0 ${boxShadowSpread}px 0px var(--lighter-gray)`;
-    const background = useMotionTemplate`rgba(255,255,255,${backgroundOpacity})`;
-
+    const Prefix = "window";
     return (
-      <motion.div
-        className={Prefix}
+      <animated.div
         ref={windowRef}
-        onMouseDown={() => topWindow.set(id)}
-        onMouseMove={handleOnMouseMove}
-        onMouseLeave={() => animate(boundingBoxOpacity, 0, TWEEN_ANIMATION)}
-        style={{ width, height, zIndex, boxShadow, background, transform }}
+        className={`${Prefix}__container`}
+        style={{ width, height, transform: containerTransform }}
       >
-        <BoundingBox
-          title={title}
-          opacity={boundingBoxOpacity}
-          onResize={handleOnResize}
-          onClose={handleOnClose}
-        >
-          <motion.div
+        <animated.div className={Prefix} style={{ transform: rotation }}>
+          <animated.div
+            ref={contentRef}
             className={`${Prefix}__content`}
-            style={{ opacity: contentOpacity }}
-            onPan={handleOnDrag}
-            onPanEnd={handleOnDragEnd}
+            // @ts-ignore
+            style={{ opacity: openAmount }}
           >
             {content}
-          </motion.div>
-        </BoundingBox>
-        {icon && (
-          <motion.img
-            className={`${Prefix}__icon`}
-            alt={`${title} project-icon`}
-            style={{ opacity: iconOpacity }}
-            src={icon}
-          />
-        )}
-      </motion.div>
+            <SVG.Close className={`${Prefix}__close`} onClick={handleOnClose} />
+          </animated.div>
+          {icon && (
+            <animated.img
+              className={`${Prefix}__icon`}
+              alt={`${title} project-icon`}
+              // @ts-ignore
+              style={{ opacity: iconOpacity }}
+              src={icon}
+            />
+          )}
+        </animated.div>
+      </animated.div>
     );
   },
   (p, n) => p.id === n.id

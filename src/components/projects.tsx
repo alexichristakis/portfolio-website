@@ -8,6 +8,10 @@ import "./projects.scss";
 
 const ClassPrefix = "project";
 
+const IconContentContainer: React.FC = ({ children }) => (
+  <div className={`${ClassPrefix}__icon-content`}>{children}</div>
+);
+
 const Container: React.FC = ({ children }) => (
   <div className={`${ClassPrefix}__container`}>{children}</div>
 );
@@ -18,6 +22,14 @@ export const projects: Project[] = [
     icon: Icons.resume,
     aspectRatio: 1.294117647,
     color: "",
+    iconContent: (
+      <IconContentContainer>
+        <p>
+          Graduated from Yale in 2020, currently a software engineer at Retool.
+        </p>
+        <p>Previously at TrialSpark, Zillow, Snackpass.</p>
+      </IconContentContainer>
+    ),
     content: (
       <img
         className="resume"
@@ -30,6 +42,16 @@ export const projects: Project[] = [
     title: "paint.party",
     icon: Icons.paintParty,
     color: "",
+    iconContent: (
+      <IconContentContainer>
+        <h1>Paint Party</h1>
+        <h2>April 2020</h2>
+        <p>
+          Collaborative mobile drawing game. TypeScript, React Native, Firebase.
+          Winner of Yale's Lohmann Design Prize.
+        </p>
+      </IconContentContainer>
+    ),
     content: (
       <Gallery
         images={[
@@ -44,12 +66,22 @@ export const projects: Project[] = [
         ]}
       />
     ),
-    link: "https://paintparty.io",
+    links: [{ title: "website", uri: "https://paintparty.io" }],
   },
   {
     title: "unexpected",
     icon: Icons.unexpected,
     color: "",
+    iconContent: (
+      <IconContentContainer>
+        <h1>Unexpected</h1>
+        <h2>March 2020</h2>
+        <p>
+          Senior thesis project. A photo sharing app that limits how often {"&"}
+          when users can post.
+        </p>
+      </IconContentContainer>
+    ),
     content: <div>hello!</div>,
   },
   {
@@ -57,7 +89,7 @@ export const projects: Project[] = [
     color: "",
     content: <div>hello!</div>,
     icon: Icons.screentime,
-    link: "https://screentime-525d7.firebaseapp.com",
+    links: [{ title: "live", uri: "https://screentime-525d7.firebaseapp.com" }],
   },
   {
     title: "accordion",

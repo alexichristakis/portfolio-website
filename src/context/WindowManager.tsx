@@ -1,5 +1,4 @@
 import { createContext, useCallback, useMemo, useRef, useState } from "react";
-import { useMotionValue } from "framer-motion";
 
 import { Project as ProjectType } from "../types";
 import { useEvents, Events } from "../hooks";
@@ -43,7 +42,6 @@ export const WindowManagerContext = createContext({} as WindowManagerState);
 export const WindowManagerProvider: React.FC = ({ children }) => {
   const registeredWindows = useRef<WindowMap>({});
   const [openWindows, setOpenWindows] = useState<string[]>([]);
-  const topWindow = useMotionValue("");
 
   const { send, subscribe } = useEvents<WindowEvent>();
 
@@ -103,7 +101,7 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
             key={id}
             onRequestClose={() => requestClose(id)}
             destroyWindow={() => closeWindow(id)}
-            topWindow={topWindow}
+            // topWindow={topWindow}
             {...registeredWindows.current[id]}
           />
         ))}
