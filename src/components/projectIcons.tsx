@@ -3,7 +3,7 @@ import { animated, to, useSpring } from "react-spring";
 import { useGesture } from "react-use-gesture";
 import cn from "classnames";
 
-import { Point2D, Project, Rect } from "../types";
+import { Project } from "../types";
 import { WindowState } from "../context";
 import { setMultipleRefs } from "../lib";
 import { useMeasure, useSkewAnimation, useWindows } from "../hooks";
@@ -105,9 +105,6 @@ export const Icon: React.FC<IconProps> = ({
       onDragEnd: () => {
         set({ scale: HOVER_SCALE });
       },
-      onPinch: ({ offset: [d, a] }) => {
-        set({ zoom: d / 200, rz: a });
-      },
       onMouseDown: () => {
         set({ scale: CLICK_SCALE });
       },
@@ -129,9 +126,18 @@ export const Icon: React.FC<IconProps> = ({
     },
     {
       domTarget: containerRef,
-      eventOptions: { passive: false },
+      eventOptions: { passive: true },
       drag: { threshold: 5 },
     }
+  );
+
+  useGesture(
+    {
+      onPinch: ({ offset: [d, a] }) => {
+        set({ zoom: d / 200, rz: a });
+      },
+    },
+    { domTarget: containerRef, eventOptions: { passive: false } }
   );
 
   const contentTransform = scroll.to((val) => `translateY(${val}px)`);

@@ -54,9 +54,10 @@ export const projects: Project[] = [
         <h1>Paint Party</h1>
         <h2>April 2020</h2>
         <p>
-          Collaborative mobile drawing game. TypeScript, React Native, Firebase.
-          Winner of Yale's Lohmann Design Prize.
+          Collaborative mobile drawing game. Winner of Yale's Lohmann Design
+          Prize.
         </p>
+        <p>TypeScript, React Native, Firebase.</p>
       </IconContentContainer>
     ),
     content: (
@@ -87,8 +88,9 @@ export const projects: Project[] = [
         <p>
           Senior thesis project. A photo sharing app that limits how often
           {" & "}
-          when users can post. React Native, TypeScript, NodeJS, MongoDB.
+          when users can post.
         </p>
+        <p>React Native, TypeScript, NodeJS, MongoDB.</p>
       </IconContentContainer>
     ),
     content: <div>hello!</div>,
@@ -108,6 +110,7 @@ export const projects: Project[] = [
           Class project that generates a visualization of iOS screentime
           metrics. To better illustrate our behaviors.
         </p>
+        <p>React, Processing.</p>
       </IconContentContainer>
     ),
   },
@@ -133,6 +136,12 @@ export const projects: Project[] = [
     backgroundColor: "",
     foregroundColor: "",
     content: <div>hello!</div>,
+    iconContent: (
+      <IconContentContainer>
+        <h1>Photography</h1>
+        <p>Selected photos.</p>
+      </IconContentContainer>
+    ),
   },
   {
     title: "herd",
@@ -144,7 +153,11 @@ export const projects: Project[] = [
       <IconContentContainer>
         <h1>Herd</h1>
         <h2>Summer 2019</h2>
-        <p>Socialized location sharing.</p>
+        <p>
+          Socialized location sharing. Emphasis on large groups{" & "}anonymous
+          background location sharing.
+        </p>
+        <p>React Native, Firebase.</p>
       </IconContentContainer>
     ),
   },
@@ -154,13 +167,30 @@ export const projects: Project[] = [
     backgroundColor: "",
     foregroundColor: "",
     content: <div>hello!</div>,
+    iconContent: (
+      <IconContentContainer>
+        <h1>Evently</h1>
+        <h2>Fall 2018</h2>
+        <p>
+          Software Engineering class project. Event API aggregator with
+          card-swiping interface. React Native, NodeJS, Firebase.
+        </p>
+      </IconContentContainer>
+    ),
   },
   {
     title: "sesh",
     icon: Icons.sesh,
-    backgroundColor: "",
+    backgroundColor: "#865EFF",
     foregroundColor: "",
     content: <div>hello!</div>,
+    iconContent: (
+      <IconContentContainer>
+        <h1>Sesh</h1>
+        <h2>Summer 2018</h2>
+        <p>Event-based social app. Quickly notify friends of adhoc events.</p>
+      </IconContentContainer>
+    ),
   },
   // {
   //   title: "twitterlytics",

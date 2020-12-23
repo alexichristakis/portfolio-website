@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Interpolation, to, useSpring } from "react-spring";
 import { GestureKey, Handler } from "react-use-gesture/dist/types";
 
-import { INITIAL_RECT } from "../lib";
+import { invlerp, INITIAL_RECT } from "../lib";
 import { Vector2D, Rect } from "../types";
 
 type GestureHander<T extends GestureKey> = Handler<
@@ -28,8 +28,9 @@ const calc = ([px, py]: Vector2D, rect: Rect, throttle: number = 1) => [
   (px - rect.x - rect.width / 2) / (20 * throttle),
 ];
 
-export const useSkewAnimation = ({ ref, throttle }: Config): Return => {
+export const useSkewAnimation = ({ ref, throttle = 1 }: Config): Return => {
   const containerRect = useRef<Rect>(INITIAL_RECT);
+  const sizeThrottle = useRef(0);
 
   const [{ rotateX, rotateY }, set] = useSpring(() => ({
     rotateX: 0,
@@ -42,6 +43,16 @@ export const useSkewAnimation = ({ ref, throttle }: Config): Return => {
     const rect = ref.current?.getBoundingClientRect();
     if (rect) {
       const { width, height, x, y } = rect;
+
+      // when items are larger than 750px even small rotations
+      // are quite jarring
+      sizeThrottle.current =
+        invlerp(
+          750,
+          Math.min(window.innerHeight, window.innerWidth),
+          Math.max(width, height)
+        ) * 100;
+
       containerRect.current = { x, y, width, height };
     }
   };
@@ -66,7 +77,7 @@ export const useSkewAnimation = ({ ref, throttle }: Config): Return => {
         const [rotateX, rotateY] = calc(
           [px, py],
           containerRect.current,
-          throttle
+          throttle + sizeThrottle.current
         );
         set({ rotateX, rotateY });
       }

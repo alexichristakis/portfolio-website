@@ -3,6 +3,7 @@ import { animated, useSpring, to } from "react-spring";
 import { useGesture } from "react-use-gesture";
 
 import { useSkewAnimation } from "../hooks";
+import { clamp } from "../lib";
 import { SVG } from "../assets/icons";
 import { WindowConfig } from "../context";
 import "./window.scss";
@@ -34,10 +35,11 @@ export const Window: React.FC<WindowProps> = memo(
 
     const getSourceRect = () => sourceRef.current?.getBoundingClientRect()!;
 
-    const initialHeight = aspectRatio
-      ? WINDOW_WIDTH * aspectRatio
-      : WINDOW_HEIGHT;
     const initialWidth = WINDOW_WIDTH;
+    const initialHeight = aspectRatio
+      ? initialWidth * aspectRatio
+      : WINDOW_HEIGHT;
+
     const initialRect = getSourceRect();
 
     const [
@@ -101,7 +103,45 @@ export const Window: React.FC<WindowProps> = memo(
           }
         },
       },
-      { domTarget: contentRef }
+      { domTarget: contentRef, eventOptions: { passive: true } }
+    );
+
+    useGesture(
+      {
+        onPinch: ({ delta: [, d], first }) => {
+          const prevWidth = width.get();
+          const prevHeight = height.get();
+          const scale = 1 - d / 5;
+
+          const nextWidth = clamp(
+            prevWidth * scale,
+            initialWidth,
+            aspectRatio
+              ? aspectRatio * window.innerWidth > window.innerHeight
+                ? (window.innerHeight - 20) / aspectRatio
+                : window.innerWidth - 20
+              : window.innerWidth - 20
+          );
+
+          const nextHeight = clamp(
+            prevHeight * scale,
+            initialHeight,
+            aspectRatio
+              ? aspectRatio * window.innerWidth > window.innerHeight
+                ? window.innerHeight - 20
+                : aspectRatio * (window.innerWidth - 20)
+              : window.innerHeight - 20
+          );
+
+          set({
+            offsetX: (window.innerWidth - nextWidth) / 2,
+            offsetY: (window.innerHeight - nextHeight) / 2,
+            width: nextWidth,
+            height: nextHeight,
+          });
+        },
+      },
+      { domTarget: contentRef, eventOptions: { passive: false } }
     );
 
     const handleOnClose = useCallback(() => {
