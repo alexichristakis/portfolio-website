@@ -1,8 +1,10 @@
 import { createContext, useRef, useEffect } from "react";
-import { MotionValue, Point2D, useMotionValue } from "framer-motion";
+import { SpringValue, useSpring } from "react-spring";
 
 import { CURSOR_ZINDEX } from "../lib";
+import { Point2D, SpringPoint2D } from "../types";
 import { Events, useEvents } from "../hooks";
+import { useGesture } from "react-use-gesture";
 
 export type CursorMoveHandlers = {
   handler: {
@@ -34,7 +36,7 @@ export type CursorEvent = {
 };
 
 export type CursorPositionState = {
-  position: { x: MotionValue<number>; y: MotionValue<number> };
+  position: SpringValue<number[]>;
   target: React.RefObject<CursorTarget>;
   pressed: React.RefObject<boolean>;
   lock: (target: CursorTarget) => void;
@@ -47,41 +49,32 @@ export const CursorStateContext = createContext({} as CursorPositionState);
 export const CursorStateProvider: React.FC = ({ children }) => {
   const pressed = useRef(false);
   const target = useRef<CursorTarget | null>(null);
-  const x = useMotionValue(-10);
-  const y = useMotionValue(-10);
+
+  const [mouse, set] = useSpring(() => ({
+    xy: [-10, -10],
+    pressed: false,
+    config: { duration: 0 },
+  }));
 
   const { send, subscribe } = useEvents<CursorEvent>();
 
-  useEffect(() => {
-    const handleMouseMove = ({ clientX, clientY }: MouseEvent) => {
-      x.set(clientX);
-      y.set(clientY);
-    };
+  useGesture(
+    {
+      onMove: ({ xy }) => set({ xy }),
+      onMouseDown: () => set({ pressed: true }),
+      onMouseUp: () => set({ pressed: false }),
+    },
+    { domTarget: window }
+  );
 
-    const handleMouseDown = (ev: MouseEvent) => {
-      pressed.current = true;
-    };
-
-    const handleMouseUp = (ev: MouseEvent) => {
-      pressed.current = false;
-    };
-
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, []);
-
-  const getCurrentPosition = (): Point2D => ({ x: x.get(), y: y.get() });
+  const getCurrentPosition = () => ({
+    x: mouse.xy.get()[0],
+    y: mouse.xy.get()[1],
+  });
 
   const lock = (lockedTarget: CursorTarget) => {
     if (!(pressed.current && target.current)) {
       target.current = lockedTarget;
-      console.log("LOCK");
       send({
         type: CursorEventType.LOCK,
         target: lockedTarget,
@@ -101,7 +94,7 @@ export const CursorStateProvider: React.FC = ({ children }) => {
 
   return (
     <CursorStateContext.Provider
-      value={{ position: { x, y }, pressed, subscribe, target, lock, unlock }}
+      value={{ position: mouse.xy, pressed, subscribe, target, lock, unlock }}
     >
       {children}
     </CursorStateContext.Provider>

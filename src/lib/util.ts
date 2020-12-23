@@ -1,4 +1,5 @@
 import { Ref, MutableRefObject } from "react";
+import { Vector2D, SpringVector2D } from "../types";
 
 export const setStyleProperties = (
   element: HTMLElement | null,
@@ -19,4 +20,15 @@ export const setMultipleRefs = <RefType = any>(
       (ref as MutableRefObject<any>).current = element;
     }
   }
+};
+
+export const getVectorVal = (v: SpringVector2D): Vector2D => {
+  let x, y;
+  if (v instanceof Array) {
+    x = v[0].get();
+    y = v[1].get();
+  } else {
+    [x, y] = v.get();
+  }
+  return [x, y];
 };

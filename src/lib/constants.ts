@@ -1,3 +1,5 @@
+import { Rect } from "../types";
+
 export const BOX_SIZE = 250;
 
 export const DEFAULT_CURSOR_SIZE = 10;
@@ -22,4 +24,11 @@ export const TWEEN_ANIMATION_2 = {
 
 export const EASING = {
   easeOutCirc: (x: number) => Math.sqrt(1 - Math.pow(x - 1, 2)),
+};
+
+export const INITIAL_RECT: Rect = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
 };

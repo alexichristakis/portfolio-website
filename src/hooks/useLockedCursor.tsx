@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useRef } from "react";
-import { useMotionValue, useSpring } from "framer-motion";
+import { useGesture } from "react-use-gesture";
+import { useSpring } from "react-spring";
 
 import {
   CursorStateContext,
@@ -8,20 +9,21 @@ import {
 } from "../context";
 
 type UseLockedCursorHandlers = {
-  onMouseEnter?: (e: MouseEvent) => void;
-  onMouseLeave?: (e?: MouseEvent) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 };
 
 export const useLockedCursor = (
   ref: React.RefObject<HTMLElement>,
   config: CursorTargetConfig,
   handlers?: UseLockedCursorHandlers
-) => {
+): [ReturnType<typeof useGesture>, any] => {
   const lockedTarget = useRef<CursorTarget | null>(null);
-  const zIndex = useMotionValue(0);
-  const scale = useSpring(1);
   const { position, pressed, lock, unlock } = useContext(CursorStateContext);
 
+  const [style, setStyle] = useSpring(() => ({
+    scale: 1,
+  }));
   // const xOffset = useTransform(position.x, (x) => {
   //   if (isLocked.value && lockedRect.current) {
   //     const { width, left } = lockedRect.current;
@@ -46,55 +48,54 @@ export const useLockedCursor = (
   //   return 0;
   // });
 
-  const handleMouseEnter = useCallback((ev: MouseEvent) => {
-    const rect = ref.current?.getBoundingClientRect();
-    if (rect) {
-      const target: CursorTarget = { rect, ...config };
-      lockedTarget.current = target;
-      lock(target);
-      scale.set(config.scale);
-    }
+  // useEffect(() => {
+  //   const node = ref.current;
+  //   node?.addEventListener("mouseenter", handleMouseEnter, {
+  //     passive: true,
+  //   });
 
-    handlers?.onMouseEnter?.(ev);
-  }, []);
+  //   node?.addEventListener("mouseleave", handleMouseLeave, {
+  //     passive: true,
+  //   });
 
-  const handleMouseLeave = useCallback((ev?: MouseEvent) => {
-    const target = lockedTarget.current;
-    if (
-      target &&
-      (!target.draggable || (target.draggable && !pressed.current))
-    ) {
-      // try to get the new element location if available
+  //   return () => {
+  //     handleMouseLeave();
+  //     node?.removeEventListener("mouseenter", handleMouseEnter);
+  //     node?.removeEventListener("mouseleave", handleMouseLeave);
+  //   };
+  // });
+
+  const bind = useGesture({
+    onMouseEnter: ({ event }) => {
       const rect = ref.current?.getBoundingClientRect();
+      if (rect) {
+        const target: CursorTarget = { rect, ...config };
+        lockedTarget.current = target;
+        lock(target);
+      }
 
-      unlock({
-        ...target,
-        rect: rect ?? target.rect,
-      });
+      handlers?.onMouseEnter?.();
+    },
+    onMouseLeave: ({ event }) => {
+      const target = lockedTarget.current;
+      if (
+        target &&
+        (!target.draggable || (target.draggable && !pressed.current))
+      ) {
+        // try to get the new element location if available
+        const rect = ref.current?.getBoundingClientRect();
 
-      // reset state
-      lockedTarget.current = null;
-      scale.set(1);
-    }
+        unlock({
+          ...target,
+          rect: rect ?? target.rect,
+        });
 
-    handlers?.onMouseLeave?.(ev);
-  }, []);
+        // reset state
+        lockedTarget.current = null;
+      }
 
-  useEffect(() => {
-    const node = ref.current;
-    node?.addEventListener("mouseenter", handleMouseEnter, {
-      passive: true,
-    });
-
-    node?.addEventListener("mouseleave", handleMouseLeave, {
-      passive: true,
-    });
-
-    return () => {
-      handleMouseLeave();
-      node?.removeEventListener("mouseenter", handleMouseEnter);
-      node?.removeEventListener("mouseleave", handleMouseLeave);
-    };
+      handlers?.onMouseLeave?.();
+    },
   });
 
   // const transform = useTranslate({
@@ -102,13 +103,15 @@ export const useLockedCursor = (
   //   y: useSpring(yOffset),
   // });
 
-  return {
-    // cursorPosition: position,
-    // isLocked: isLocked.value,
-    style: {
-      // transform,
-      scale,
-      zIndex,
-    },
-  };
+  return [bind, style];
+
+  // return {
+  //   // cursorPosition: position,
+  //   // isLocked: isLocked.value,
+  //   style: {
+  //     // transform,
+  //     scale,
+  //     zIndex,
+  //   },
+  // };
 };
