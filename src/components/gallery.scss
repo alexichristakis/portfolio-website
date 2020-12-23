@@ -1,20 +1,19 @@
 .gallery {
   overflow-x: scroll;
   background-color: var(--gray);
-  height: 33%;
+  height: 55%;
   padding: 0 25px;
   max-height: 500px;
   display: flex;
   flex-direction: row;
 
   &__image {
-    height: 100%;
-    width: 100%;
+    padding: 45px 45px 45px 0;
+    height: calc(100% - 90px);
     object-fit: contain;
 
     &-container {
-      margin-right: 20px;
-      padding: 10px 0 10px 0;
+      padding: 45px 0;
     }
 
     &-caption {

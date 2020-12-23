@@ -10,6 +10,9 @@ export const ICON_ZINDEX = 2;
 export const WINDOW_ZINDEX = 3;
 export const FOCUSED_ZINDEX = 4;
 
+export const PROJECT_SIZE = 225;
+export const ICON_BORDER_RADIUS = 10;
+
 export const TWEEN_ANIMATION = {
   type: "tween",
   ease: "easeOut",

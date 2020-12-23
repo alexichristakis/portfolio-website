@@ -5,14 +5,13 @@ import cn from "classnames";
 
 import { Project } from "../types";
 import { WindowState } from "../context";
-import { setMultipleRefs } from "../lib";
+import { setMultipleRefs, PROJECT_SIZE } from "../lib";
 import { useMeasure, useSkewAnimation, useWindows } from "../hooks";
 import { projects } from "./projects";
 import ScrollBar from "./scrollbar";
 
 import "./projectIcons.scss";
 
-const PROJECT_SIZE = 225;
 const PROJECT_MARGIN = 40;
 const HOVER_SCALE = 1.4;
 const CLICK_SCALE = 1.2;

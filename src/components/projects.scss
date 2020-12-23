@@ -1,27 +1,37 @@
 .project {
-  &__icon-content {
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+    padding: 0 10px;
+  }
+
+  h1 {
     padding-top: 5px;
+    font-size: var(--font-size-72);
+  }
 
-    h1,
-    h2,
-    p {
-      margin: 0;
-      padding: 0 10px;
-    }
+  h2 {
+    padding-top: 5px;
+    font-size: var(--font-size-24);
+  }
 
-    h1 {
-      font-size: var(--font-size-24);
-    }
+  h3 {
+    font-size: var(--font-size-12);
+  }
 
-    h2 {
-      font-size: var(--font-size-12);
-    }
+  p {
+    font-size: var(--font-size-10);
+    margin-top: 5px;
+  }
 
-    p {
-      font-size: var(--font-size-10);
-      margin-top: 5px;
-    }
+  &__container {
+    width: 100%;
+    height: 100%;
+  }
 
+  &__icon-content {
     &-banner {
       left: 0;
       right: 0;
@@ -33,11 +43,6 @@
       background-color: var(--project-background);
       color: var(--project-foreground);
     }
-  }
-
-  &__container {
-    width: 100%;
-    height: 100%;
   }
 }
 

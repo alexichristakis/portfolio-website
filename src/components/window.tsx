@@ -2,10 +2,10 @@ import { useCallback, useEffect, memo, useRef } from "react";
 import { animated, useSpring, to } from "react-spring";
 import { useGesture } from "react-use-gesture";
 
-import { useSkewAnimation } from "../hooks";
-import { clamp } from "../lib";
 import { SVG } from "../assets/icons";
+import { useSkewAnimation } from "../hooks";
 import { WindowConfig } from "../context";
+import { clamp, PROJECT_SIZE } from "../lib";
 import "./window.scss";
 
 interface WindowProps extends WindowConfig {
@@ -41,7 +41,6 @@ export const Window: React.FC<WindowProps> = memo(
       : WINDOW_HEIGHT;
 
     const initialRect = getSourceRect();
-
     const [
       { openAmount, width, height, scaleX, scaleY, offsetX, offsetY },
       set,
@@ -72,12 +71,12 @@ export const Window: React.FC<WindowProps> = memo(
 
     useGesture(
       {
+        onHover,
         onMove: (ev) => {
           if (!isClosing.current) {
             onMove(ev);
           }
         },
-        onHover,
         onDrag: ({ first, delta: [x, y] }) => {
           if (first) {
             resetRotation();
@@ -108,7 +107,9 @@ export const Window: React.FC<WindowProps> = memo(
 
     useGesture(
       {
-        onPinch: ({ delta: [, d], first }) => {
+        onPinch: ({ delta: [, d], velocities: [vd], canceled, cancel }) => {
+          if (canceled || isClosing.current) return;
+
           const prevWidth = width.get();
           const prevHeight = height.get();
           const scale = 1 - d / 5;
@@ -133,20 +134,28 @@ export const Window: React.FC<WindowProps> = memo(
               : window.innerHeight - 20
           );
 
-          set({
-            offsetX: (window.innerWidth - nextWidth) / 2,
-            offsetY: (window.innerHeight - nextHeight) / 2,
-            width: nextWidth,
-            height: nextHeight,
-          });
+          if (
+            vd < 0 &&
+            nextHeight === initialHeight &&
+            nextWidth === initialWidth
+          ) {
+            close();
+            cancel();
+          } else {
+            set({
+              offsetX: (window.innerWidth - nextWidth) / 2,
+              offsetY: (window.innerHeight - nextHeight) / 2,
+              width: nextWidth,
+              height: nextHeight,
+            });
+          }
         },
       },
       { domTarget: contentRef, eventOptions: { passive: false } }
     );
 
-    const handleOnClose = useCallback(() => {
+    const close = useCallback(() => {
       isClosing.current = true;
-
       onRequestClose();
       resetRotation();
       requestAnimationFrame(() => {
@@ -177,38 +186,59 @@ export const Window: React.FC<WindowProps> = memo(
       output: [1, 0],
     });
 
+    const contentOpacity = openAmount.to({
+      range: [0, 0.1, 0.25],
+      output: [0, 0, 1],
+    });
+
     const Prefix = "window";
     return (
-      <animated.div
-        ref={windowRef}
-        className={`${Prefix}__container`}
-        style={{ width, height, transform: containerTransform }}
-      >
-        <animated.div className={Prefix} style={{ transform: rotation }}>
-          <animated.div
-            ref={contentRef}
-            className={`${Prefix}__content`}
+      <>
+        <animated.div
+          ref={windowRef}
+          className={`${Prefix}__container`}
+          style={{ width, height, transform: containerTransform }}
+        >
+          <animated.div className={Prefix} style={{ transform: rotation }}>
+            <animated.div
+              ref={contentRef}
+              className={`${Prefix}__content`}
+              style={{
+                // @ts-ignore
+                opacity: contentOpacity,
+                "--project-background": backgroundColor,
+                "--project-foreground": foregroundColor,
+              }}
+            >
+              {content}
+              <SVG.Close className={`${Prefix}__close`} onClick={close} />
+            </animated.div>
+          </animated.div>
+        </animated.div>
+        {icon && (
+          <animated.img
+            className={`${Prefix}__icon`}
+            alt={`${title} project-icon`}
             style={{
               // @ts-ignore
-              opacity: openAmount,
-              "--project-background": backgroundColor,
-              "--project-foreground": foregroundColor,
+              opacity: iconOpacity,
+              transform: to(
+                [offsetX, offsetY, width, height, scaleX, scaleY],
+                (x, y, width, height, scaleX, scaleY) =>
+                  `translate(
+                    ${x + (width / 2) * scaleX - PROJECT_SIZE / 2}px, 
+                    ${y + (height / 2) * scaleY - PROJECT_SIZE / 2}px
+                   ) 
+                   scale(
+                     ${(width / PROJECT_SIZE) * scaleX},
+                     ${(height / PROJECT_SIZE) * scaleY}
+                   )`
+              ),
             }}
-          >
-            {content}
-            <SVG.Close className={`${Prefix}__close`} onClick={handleOnClose} />
-          </animated.div>
-          {icon && (
-            <animated.img
-              className={`${Prefix}__icon`}
-              alt={`${title} project-icon`}
-              // @ts-ignore
-              style={{ opacity: iconOpacity }}
-              src={icon}
-            />
-          )}
-        </animated.div>
-      </animated.div>
+            src={icon}
+          />
+        )}
+      </>
     );
   },
   (p, n) => p.id === n.id

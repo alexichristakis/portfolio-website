@@ -7,9 +7,8 @@
 }
 
 .project-icon {
-  $project-size: 225px;
-  width: $project-size;
-  height: $project-size;
+  width: var(--project-size);
+  height: var(--project-size);
   will-change: transform;
 
   user-select: none;
@@ -20,7 +19,7 @@
   touch-action: none;
   position: absolute;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: var(--icon-border-radius);
   background: var(--near-white);
 
   transition: box-shadow 0.5s;
@@ -36,8 +35,8 @@
   }
 
   &__image {
-    width: $project-size;
-    height: $project-size;
+    width: var(--project-size);
+    height: var(--project-size);
   }
 
   &__shine {

@@ -14,20 +14,16 @@ const ClassPrefix = "gallery";
 
 const GalleryImage: React.FC<Image> = ({ src, caption }) => {
   return (
-    <animated.div className={`${ClassPrefix}__image-container`}>
-      <img
-        className={`${ClassPrefix}__image`}
-        draggable={false}
-        src={src}
-        alt="project image"
-      />
-      <div className={`${ClassPrefix}__image-caption`}>{caption}</div>
-    </animated.div>
+    <img
+      className={`${ClassPrefix}__image`}
+      draggable={false}
+      src={src}
+      alt="project image"
+    />
   );
 };
 
 const Gallery: React.FC<GalleryProps> = ({ images }) => {
-  console.log({ images });
   return (
     <animated.div className={ClassPrefix}>
       {images.map((image, idx) => (

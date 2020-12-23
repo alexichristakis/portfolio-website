@@ -9,7 +9,7 @@ import "./projects.scss";
 const ClassPrefix = "project";
 
 const IconContentContainer: React.FC = ({ children }) => (
-  <div className={`${ClassPrefix}__icon-content`}>
+  <div className={cn(ClassPrefix, `${ClassPrefix}__icon-content`)}>
     {children}
     <div className={`${ClassPrefix}__icon-content-banner`}>
       <h2>Click for more</h2>
@@ -18,7 +18,7 @@ const IconContentContainer: React.FC = ({ children }) => (
 );
 
 const Container: React.FC = ({ children }) => (
-  <div className={`${ClassPrefix}__container`}>{children}</div>
+  <div className={cn(ClassPrefix, `${ClassPrefix}__container`)}>{children}</div>
 );
 
 export const projects: Project[] = [
@@ -51,8 +51,8 @@ export const projects: Project[] = [
     foregroundColor: "#D8D8D8",
     iconContent: (
       <IconContentContainer>
-        <h1>Paint Party</h1>
-        <h2>April 2020</h2>
+        <h2>Paint Party</h2>
+        <h3>April 2020</h3>
         <p>
           Collaborative mobile drawing game. Winner of Yale's Lohmann Design
           Prize.
@@ -61,18 +61,23 @@ export const projects: Project[] = [
       </IconContentContainer>
     ),
     content: (
-      <Gallery
-        images={[
-          { src: ProjectAssets.paintpartyCanvases, caption: "canvases" },
-          { src: ProjectAssets.paintpartyColorEditor, caption: "canvases" },
-          { src: ProjectAssets.paintpartyDraw, caption: "canvases" },
-          { src: ProjectAssets.paintpartyGallery, caption: "canvases" },
-          { src: ProjectAssets.paintpartyCanvases, caption: "canvases" },
-          { src: ProjectAssets.paintpartyColorEditor, caption: "canvases" },
-          { src: ProjectAssets.paintpartyDraw, caption: "canvases" },
-          { src: ProjectAssets.paintpartyGallery, caption: "canvases" },
-        ]}
-      />
+      <Container>
+        <Gallery
+          images={[
+            { src: ProjectAssets.paintpartyCanvases, caption: "canvases" },
+            { src: ProjectAssets.paintpartyColorEditor, caption: "canvases" },
+            { src: ProjectAssets.paintpartyDraw, caption: "canvases" },
+            { src: ProjectAssets.paintpartyGallery, caption: "canvases" },
+            { src: ProjectAssets.paintpartyCanvases, caption: "canvases" },
+            { src: ProjectAssets.paintpartyColorEditor, caption: "canvases" },
+            { src: ProjectAssets.paintpartyDraw, caption: "canvases" },
+            { src: ProjectAssets.paintpartyGallery, caption: "canvases" },
+          ]}
+        />
+
+        <h1>Paint Party</h1>
+        <h2>April 2020</h2>
+      </Container>
     ),
     links: [{ title: "website", uri: "https://paintparty.io" }],
   },
@@ -83,11 +88,10 @@ export const projects: Project[] = [
     foregroundColor: "",
     iconContent: (
       <IconContentContainer>
-        <h1>Unexpected</h1>
-        <h2>March 2020</h2>
+        <h2>Unexpected</h2>
+        <h3>March 2020</h3>
         <p>
-          Senior thesis project. A photo sharing app that limits how often
-          {" & "}
+          Senior thesis project. A photo sharing app that limits how often &
           when users can post.
         </p>
         <p>React Native, TypeScript, NodeJS, MongoDB.</p>
@@ -104,8 +108,8 @@ export const projects: Project[] = [
     content: <div>hello!</div>,
     iconContent: (
       <IconContentContainer>
-        <h1>Screentime</h1>
-        <h2>October 2019</h2>
+        <h2>Screentime</h2>
+        <h3>October 2019</h3>
         <p>
           Class project that generates a visualization of iOS screentime
           metrics. To better illustrate our behaviors.
@@ -122,8 +126,8 @@ export const projects: Project[] = [
     content: <div>hello!</div>,
     iconContent: (
       <IconContentContainer>
-        <h1>Accordion</h1>
-        <h2>March 2019</h2>
+        <h2>Accordion</h2>
+        <h3>March 2019</h3>
         <p>
           Advanced Graphic Design mid-term project. An interactive accordion
           fold to view panes in many different combinations.
@@ -151,10 +155,10 @@ export const projects: Project[] = [
     content: <div>hello!</div>,
     iconContent: (
       <IconContentContainer>
-        <h1>Herd</h1>
-        <h2>Summer 2019</h2>
+        <h2>Herd</h2>
+        <h3>Summer 2019</h3>
         <p>
-          Socialized location sharing. Emphasis on large groups{" & "}anonymous
+          Socialized location sharing. Emphasis on large groups & anonymous
           background location sharing.
         </p>
         <p>React Native, Firebase.</p>
@@ -169,8 +173,8 @@ export const projects: Project[] = [
     content: <div>hello!</div>,
     iconContent: (
       <IconContentContainer>
-        <h1>Evently</h1>
-        <h2>Fall 2018</h2>
+        <h2>Evently</h2>
+        <h3>Fall 2018</h3>
         <p>
           Software Engineering class project. Event API aggregator with
           card-swiping interface. React Native, NodeJS, Firebase.
@@ -186,17 +190,24 @@ export const projects: Project[] = [
     content: <div>hello!</div>,
     iconContent: (
       <IconContentContainer>
-        <h1>Sesh</h1>
-        <h2>Summer 2018</h2>
+        <h2>Sesh</h2>
+        <h3>Summer 2018</h3>
         <p>Event-based social app. Quickly notify friends of adhoc events.</p>
       </IconContentContainer>
     ),
   },
-  // {
-  //   title: "twitterlytics",
-  //   backgroundColor: "",
-  //   foregroundColor: "",
-  //   content: <div>hello!</div>,
-  //   // icon: "",
-  // },
+  {
+    title: "twitterlytics",
+    backgroundColor: "",
+    foregroundColor: "",
+    content: <div>hello!</div>,
+    // icon: "",
+  },
+  {
+    title: "website",
+    backgroundColor: "",
+    foregroundColor: "",
+    content: <div>hello!</div>,
+    // icon: "",
+  },
 ];
