@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 
 import {
   WindowConfig,
@@ -14,7 +14,6 @@ export type UseWindowConfig = {
 
 export const useWindows = ({ window, handlers }: UseWindowConfig) => {
   const sourceRef = useRef<HTMLDivElement>(null);
-  const [windowState, setWindowState] = useState(WindowState.CLOSED);
   const { openWindow, registerWindow, subscribe } = useContext(
     WindowManagerContext
   );
@@ -26,7 +25,6 @@ export const useWindows = ({ window, handlers }: UseWindowConfig) => {
       const { type, id } = payload;
 
       if (id === window.id) {
-        setWindowState(type);
         if (type === WindowState.OPEN) {
           handlers?.onOpen?.();
         }
@@ -45,6 +43,5 @@ export const useWindows = ({ window, handlers }: UseWindowConfig) => {
   return {
     openWindow: () => openWindow(window.id),
     sourceRef,
-    windowState,
   };
 };

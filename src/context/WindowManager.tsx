@@ -56,9 +56,10 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
 
   const handleWindowOpen = useCallback((id: string) => {
     send({ type: WindowState.OPEN, id });
-
     registeredWindows.current[id].state = WindowState.OPEN;
-    setOpenWindows((prev) => [...prev, id]);
+    requestAnimationFrame(() => {
+      setOpenWindows((prev) => [...prev, id]);
+    });
   }, []);
 
   const openWindow = useCallback((id: string) => {
@@ -79,7 +80,9 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
   const closeWindow = useCallback((id: string) => {
     send({ type: WindowState.CLOSED, id });
     registeredWindows.current[id].state = WindowState.CLOSED;
-    setOpenWindows((prev) => prev.filter((window) => window !== id));
+    requestAnimationFrame(() => {
+      setOpenWindows((prev) => prev.filter((window) => window !== id));
+    });
   }, []);
 
   const state = useMemo(

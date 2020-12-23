@@ -48,6 +48,7 @@ export const Icon: React.FC<IconProps> = ({
 
   const { height: contentHeight } = useMeasure(contentRef);
 
+  const [{ visible }, setVisible] = useSpring(() => ({ visible: true }));
   const [{ xy, rz, scroll, zoom, scale }, set] = useSpring(() => ({
     xy: [0, 0],
     rz: 0,
@@ -56,11 +57,11 @@ export const Icon: React.FC<IconProps> = ({
     scale: INITIAL_SCALE,
   }));
 
-  const { windowState, sourceRef, openWindow } = useWindows({
+  const { sourceRef, openWindow } = useWindows({
     window: { title, icon, backgroundColor, foregroundColor, ...rest },
     handlers: {
-      onOpen: () => {},
-      onClose: () => {},
+      onOpen: () => setVisible({ visible: false, immediate: true }),
+      onClose: () => setVisible({ visible: true, immediate: true }),
     },
   });
 
@@ -150,6 +151,9 @@ export const Icon: React.FC<IconProps> = ({
     (t, s, r) => `${t} ${s} ${r}`
   );
 
+  const pointerEvents = visible.to((visible) => (visible ? "all" : "none"));
+  const opacity = visible.to((visible) => (visible ? 1 : 0));
+
   const ClassPrefix = "project-icon";
   return (
     <animated.div
@@ -158,8 +162,9 @@ export const Icon: React.FC<IconProps> = ({
       onClick={handleOnClick}
       style={{
         transform: containerTransform,
+        pointerEvents,
         // @ts-ignore
-        opacity: windowState === WindowState.CLOSED ? 1 : 0,
+        opacity,
         "--project-background": backgroundColor,
         "--project-foreground": foregroundColor,
       }}
