@@ -6,6 +6,9 @@ import sesh from "./sesh.png";
 import resume from "./resume.png";
 import screentime from "./screentime.png";
 import accordion from "./accordion.png";
+import twitterlytics from "./twitterlytics.png";
+import website from "./website.png";
+import photography from "./photography.png";
 
 export default {
   paintParty,
@@ -16,6 +19,9 @@ export default {
   evently,
   sesh,
   accordion,
+  twitterlytics,
+  website,
+  photography,
 };
 
 export { SVG } from "./svg";

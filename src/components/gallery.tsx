@@ -3,7 +3,7 @@ import "./gallery.scss";
 
 type Image = {
   src: string;
-  caption: string;
+  caption?: string;
 };
 
 export interface GalleryProps {

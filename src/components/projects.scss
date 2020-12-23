@@ -1,37 +1,63 @@
 .project {
-  h1,
-  h2,
-  h3,
-  p {
-    margin: 0;
-    padding: 0 10px;
-  }
-
-  h1 {
-    padding-top: 5px;
-    font-size: var(--font-size-72);
-  }
-
-  h2 {
-    padding-top: 5px;
-    font-size: var(--font-size-24);
-  }
-
-  h3 {
-    font-size: var(--font-size-12);
-  }
-
-  p {
-    font-size: var(--font-size-10);
-    margin-top: 5px;
-  }
-
   &__container {
+    overflow-x: hidden;
+    overflow-y: scroll;
     width: 100%;
     height: 100%;
+
+    h1 {
+      font-size: var(--font-size-72);
+    }
+
+    h2 {
+      font-size: var(--font-size-24);
+    }
+
+    p {
+      margin-top: 10px;
+      font-size: var(--font-size-12);
+    }
+  }
+
+  &__links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 20px;
+
+    a {
+    }
+  }
+
+  &__link {
+    text-decoration: underline;
+    color: var(--project-background);
+  }
+
+  &__header,
+  &__body {
+    padding: 0 5px;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
   }
 
   &__icon-content {
+    h2 {
+      font-size: var(--font-size-24);
+    }
+
+    h3 {
+      font-size: var(--font-size-12);
+    }
+
+    p {
+      margin-top: 5px;
+      font-size: var(--font-size-10);
+    }
+
     &-banner {
       left: 0;
       right: 0;

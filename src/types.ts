@@ -6,7 +6,6 @@ export type Project = {
   backgroundColor: string;
   icon?: string;
   iconContent?: React.ReactNode;
-  links?: { title: string; uri: string }[];
   content: React.ReactNode;
   aspectRatio?: number;
 };
