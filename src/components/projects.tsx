@@ -9,7 +9,12 @@ import "./projects.scss";
 const ClassPrefix = "project";
 
 const IconContentContainer: React.FC = ({ children }) => (
-  <div className={`${ClassPrefix}__icon-content`}>{children}</div>
+  <div className={`${ClassPrefix}__icon-content`}>
+    {children}
+    <div className={`${ClassPrefix}__icon-content-banner`}>
+      <h2>Click for more</h2>
+    </div>
+  </div>
 );
 
 const Container: React.FC = ({ children }) => (
@@ -21,7 +26,8 @@ export const projects: Project[] = [
     title: "resume",
     icon: Icons.resume,
     aspectRatio: 1.294117647,
-    color: "",
+    backgroundColor: "#FFD60A",
+    foregroundColor: "white",
     iconContent: (
       <IconContentContainer>
         <p>
@@ -41,7 +47,8 @@ export const projects: Project[] = [
   {
     title: "paint.party",
     icon: Icons.paintParty,
-    color: "",
+    backgroundColor: "#6236FF",
+    foregroundColor: "#D8D8D8",
     iconContent: (
       <IconContentContainer>
         <h1>Paint Party</h1>
@@ -71,14 +78,16 @@ export const projects: Project[] = [
   {
     title: "unexpected",
     icon: Icons.unexpected,
-    color: "",
+    backgroundColor: "#49E020",
+    foregroundColor: "",
     iconContent: (
       <IconContentContainer>
         <h1>Unexpected</h1>
         <h2>March 2020</h2>
         <p>
-          Senior thesis project. A photo sharing app that limits how often {"&"}
-          when users can post.
+          Senior thesis project. A photo sharing app that limits how often
+          {" & "}
+          when users can post. React Native, TypeScript, NodeJS, MongoDB.
         </p>
       </IconContentContainer>
     ),
@@ -86,44 +95,78 @@ export const projects: Project[] = [
   },
   {
     title: "screentime",
-    color: "",
-    content: <div>hello!</div>,
+    backgroundColor: "#007FFF",
+    foregroundColor: "#D6EAFF",
     icon: Icons.screentime,
     links: [{ title: "live", uri: "https://screentime-525d7.firebaseapp.com" }],
+    content: <div>hello!</div>,
+    iconContent: (
+      <IconContentContainer>
+        <h1>Screentime</h1>
+        <h2>October 2019</h2>
+        <p>
+          Class project that generates a visualization of iOS screentime
+          metrics. To better illustrate our behaviors.
+        </p>
+      </IconContentContainer>
+    ),
   },
   {
     title: "accordion",
     icon: Icons.accordion,
-    color: "",
+    backgroundColor: "",
+    foregroundColor: "",
     content: <div>hello!</div>,
+    iconContent: (
+      <IconContentContainer>
+        <h1>Accordion</h1>
+        <h2>March 2019</h2>
+        <p>
+          Advanced Graphic Design mid-term project. An interactive accordion
+          fold to view panes in many different combinations.
+        </p>
+      </IconContentContainer>
+    ),
   },
   {
     title: "photos",
-    color: "",
+    backgroundColor: "",
+    foregroundColor: "",
     content: <div>hello!</div>,
   },
   {
     title: "herd",
     icon: Icons.herd,
-    color: "",
+    backgroundColor: "#872BD2",
+    foregroundColor: "",
     content: <div>hello!</div>,
+    iconContent: (
+      <IconContentContainer>
+        <h1>Herd</h1>
+        <h2>Summer 2019</h2>
+        <p>Socialized location sharing.</p>
+      </IconContentContainer>
+    ),
   },
   {
     title: "evently",
     icon: Icons.evently,
-    color: "",
+    backgroundColor: "",
+    foregroundColor: "",
     content: <div>hello!</div>,
   },
   {
     title: "sesh",
     icon: Icons.sesh,
-    color: "",
+    backgroundColor: "",
+    foregroundColor: "",
     content: <div>hello!</div>,
   },
-  {
-    title: "twitterlytics",
-    color: "",
-    content: <div>hello!</div>,
-    // icon: "",
-  },
+  // {
+  //   title: "twitterlytics",
+  //   backgroundColor: "",
+  //   foregroundColor: "",
+  //   content: <div>hello!</div>,
+  //   // icon: "",
+  // },
 ];

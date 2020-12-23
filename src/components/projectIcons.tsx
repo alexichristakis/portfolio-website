@@ -13,7 +13,7 @@ import ScrollBar from "./scrollbar";
 import "./projectIcons.scss";
 
 const PROJECT_SIZE = 225;
-const PROJECT_MARGIN = 50;
+const PROJECT_MARGIN = 40;
 const HOVER_SCALE = 1.4;
 const CLICK_SCALE = 1.2;
 const INITIAL_SCALE = 1;
@@ -23,17 +23,13 @@ interface IconProps extends Project {
   id: string;
 }
 
-const calc = ([px, py]: Point2D, [lx, ly]: Point2D, rect: Rect) => [
-  -(py - ly - rect.height / 2) / 20,
-  (px - lx - rect.width / 2) / 20,
-];
-
 const NUM_PER_ROW = Math.floor(
-  window.innerWidth / (PROJECT_SIZE + PROJECT_MARGIN)
+  window.innerWidth / (PROJECT_SIZE + PROJECT_MARGIN * 2)
 );
 const getInitialPosition = (index: number) => [
-  (index % NUM_PER_ROW) * (PROJECT_SIZE + PROJECT_MARGIN),
-  Math.floor(index / NUM_PER_ROW) * (PROJECT_SIZE + PROJECT_MARGIN),
+  (index % NUM_PER_ROW) * (PROJECT_SIZE + PROJECT_MARGIN * 2) + PROJECT_MARGIN,
+  Math.floor(index / NUM_PER_ROW) * (PROJECT_SIZE + PROJECT_MARGIN * 2) +
+    PROJECT_MARGIN,
 ];
 
 export const Icon: React.FC<IconProps> = ({
@@ -41,6 +37,8 @@ export const Icon: React.FC<IconProps> = ({
   icon,
   iconContent,
   index,
+  backgroundColor,
+  foregroundColor,
   ...rest
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -59,7 +57,7 @@ export const Icon: React.FC<IconProps> = ({
   }));
 
   const { windowState, sourceRef, openWindow } = useWindows({
-    window: { title, icon, ...rest },
+    window: { title, icon, backgroundColor, foregroundColor, ...rest },
     handlers: {
       onOpen: () => {},
       onClose: () => {},
@@ -122,7 +120,7 @@ export const Icon: React.FC<IconProps> = ({
       onWheel: ({ hovering, delta: [, dy] }) => {
         if (hovering) {
           const next = Math.min(
-            Math.max(scroll.get() - dy * 5, -contentHeight + PROJECT_SIZE - 10),
+            Math.max(scroll.get() - dy * 5, -contentHeight + PROJECT_SIZE),
             0
           );
           set({ scroll: next });
@@ -156,6 +154,8 @@ export const Icon: React.FC<IconProps> = ({
         transform: containerTransform,
         // @ts-ignore
         opacity: windowState === WindowState.CLOSED ? 1 : 0,
+        "--project-background": backgroundColor,
+        "--project-foreground": foregroundColor,
       }}
     >
       <animated.div

@@ -25,6 +25,8 @@ export const Window: React.FC<WindowProps> = memo(
     title,
     aspectRatio,
     icon,
+    backgroundColor,
+    foregroundColor,
   }) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const windowRef = useRef<HTMLDivElement>(null);
@@ -146,8 +148,12 @@ export const Window: React.FC<WindowProps> = memo(
           <animated.div
             ref={contentRef}
             className={`${Prefix}__content`}
-            // @ts-ignore
-            style={{ opacity: openAmount }}
+            style={{
+              // @ts-ignore
+              opacity: openAmount,
+              "--project-background": backgroundColor,
+              "--project-foreground": foregroundColor,
+            }}
           >
             {content}
             <SVG.Close className={`${Prefix}__close`} onClick={handleOnClose} />

@@ -1,8 +1,4 @@
 export {
-  FocusedProjectContext,
-  FocusedProjectProvider,
-} from "./FocusedProject";
-export {
   CursorStateProvider,
   CursorEventType,
   CursorStateContext,

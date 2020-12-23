@@ -2,7 +2,8 @@ import { Interpolation, SpringValue } from "react-spring";
 
 export type Project = {
   title: string;
-  color: string;
+  foregroundColor: string;
+  backgroundColor: string;
   icon?: string;
   iconContent?: React.ReactNode;
   links?: { title: string; uri: string }[];
