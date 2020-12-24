@@ -23,7 +23,6 @@ export const Window: React.FC<WindowProps> = memo(
     destroyWindow,
     sourceRef,
     content,
-    title,
     aspectRatio,
     icon,
     backgroundColor,
@@ -175,10 +174,23 @@ export const Window: React.FC<WindowProps> = memo(
       });
     }, []);
 
-    const containerTransform = to(
-      [offsetX, offsetY, scaleX, scaleY],
-      (x, y, scaleX, scaleY) =>
-        `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`
+    const translate = to(
+      [offsetX, offsetY],
+      (x, y) => `translate(${x}px, ${y}px)`
+    );
+
+    const contentTransform = to(
+      [scaleX, scaleY],
+      (scaleX, scaleY) => `scale(${scaleX}, ${scaleY})`
+    );
+
+    const iconTransform = to(
+      [width, height, scaleX, scaleY],
+      (width, height, scaleX, scaleY) =>
+        `scale(
+          ${(width / PROJECT_SIZE) * scaleX}, 
+          ${(height / PROJECT_SIZE) * scaleY}
+        )`
     );
 
     const iconOpacity = openAmount.to({
@@ -187,58 +199,47 @@ export const Window: React.FC<WindowProps> = memo(
     });
 
     const contentOpacity = openAmount.to({
-      range: [0, 0.1, 0.25],
+      range: [0, 0.1, 0.5],
       output: [0, 0, 1],
     });
 
     const Prefix = "window";
     return (
-      <>
+      <animated.div
+        ref={windowRef}
+        className={`${Prefix}__container`}
+        style={{ width, height, transform: translate }}
+      >
+        <animated.img
+          className={`${Prefix}__icon`}
+          alt={`${id} project-icon`}
+          style={{
+            // @ts-ignore
+            opacity: iconOpacity,
+            transform: iconTransform,
+          }}
+          src={icon}
+        />
         <animated.div
-          ref={windowRef}
-          className={`${Prefix}__container`}
-          style={{ width, height, transform: containerTransform }}
+          className={Prefix}
+          style={{ transform: contentTransform }}
         >
-          <animated.div className={Prefix} style={{ transform: rotation }}>
-            <animated.div
-              ref={contentRef}
-              className={`${Prefix}__content`}
-              style={{
-                // @ts-ignore
-                opacity: contentOpacity,
-                "--project-background": backgroundColor,
-                "--project-foreground": foregroundColor,
-              }}
-            >
-              {content}
-              <SVG.Close className={`${Prefix}__close`} onClick={close} />
-            </animated.div>
-          </animated.div>
-        </animated.div>
-        {icon && (
-          <animated.img
-            className={`${Prefix}__icon`}
-            alt={`${title} project-icon`}
+          <animated.div
+            ref={contentRef}
+            className={`${Prefix}__content`}
             style={{
               // @ts-ignore
-              opacity: iconOpacity,
-              transform: to(
-                [offsetX, offsetY, width, height, scaleX, scaleY],
-                (x, y, width, height, scaleX, scaleY) =>
-                  `translate(
-                    ${x + (width / 2) * scaleX - PROJECT_SIZE / 2}px, 
-                    ${y + (height / 2) * scaleY - PROJECT_SIZE / 2}px
-                   ) 
-                   scale(
-                     ${(width / PROJECT_SIZE) * scaleX},
-                     ${(height / PROJECT_SIZE) * scaleY}
-                   )`
-              ),
+              opacity: contentOpacity,
+              transform: rotation,
+              "--project-background": backgroundColor,
+              "--project-foreground": foregroundColor,
             }}
-            src={icon}
-          />
-        )}
-      </>
+          >
+            {content}
+            <SVG.Close className={`${Prefix}__close`} onClick={close} />
+          </animated.div>
+        </animated.div>
+      </animated.div>
     );
   },
   (p, n) => p.id === n.id

@@ -4,6 +4,8 @@ import paintpartyCanvases from "./paint-party/canvases.png";
 import paintpartyColorEditor from "./paint-party/color_editor.png";
 import paintpartyDraw from "./paint-party/draw.png";
 import paintpartyGallery from "./paint-party/gallery.png";
+import paintpartyJoin from "./paint-party/join.png";
+import paintpartyDeepSea from "./paint-party/deep-sea.gif";
 
 import screentimeForm1 from "./screentime/form_1.png";
 import screentimeTooltip1 from "./screentime/tooltip_1.png";
@@ -34,6 +36,8 @@ export default {
   paintpartyColorEditor,
   paintpartyDraw,
   paintpartyGallery,
+  paintpartyJoin,
+  paintpartyDeepSea,
 
   screentimeForm1,
   screentimeTooltip1,

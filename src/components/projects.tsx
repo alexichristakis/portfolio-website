@@ -46,19 +46,19 @@ const Links: React.FC<LinksProps> = ({ links }) => (
   </div>
 );
 
-type ProjectContentProps = HeaderProps & GalleryProps & { p?: string[] };
+type ProjectContentProps = HeaderProps & GalleryProps & { copy?: string[] };
 const ProjectContent: React.FC<ProjectContentProps> = ({
   images,
   links,
   title,
   subtitle,
-  p = [],
+  copy = [],
 }) => (
   <Container>
     <Gallery images={images} />
     <Header title={title} subtitle={subtitle} links={links} />
     <div className={`${ClassPrefix}__body`}>
-      {p.map((p) => (
+      {copy.map((p) => (
         <p>{p}</p>
       ))}
     </div>
@@ -68,17 +68,17 @@ const ProjectContent: React.FC<ProjectContentProps> = ({
 type ProjectIconContentProps = {
   title?: string;
   subtitle?: string;
-  p: string[];
+  copy?: string[];
 };
 const ProjectIconContent: React.FC<ProjectIconContentProps> = ({
   title,
   subtitle,
-  p,
+  copy = [],
 }) => (
   <IconContentContainer>
     {title && <h2>{title}</h2>}
     {subtitle && <h3>{subtitle}</h3>}
-    {p.map((p) => (
+    {copy.map((p) => (
       <p>{p}</p>
     ))}
   </IconContentContainer>
@@ -86,15 +86,15 @@ const ProjectIconContent: React.FC<ProjectIconContentProps> = ({
 
 export const projects: Project[] = [
   {
-    title: "resume",
+    id: "resume",
     icon: Icons.resume,
     aspectRatio: 1.294117647,
     backgroundColor: "#FFD60A",
     foregroundColor: "white",
     iconContent: (
       <ProjectIconContent
-        p={[
-          "Graduated from Yale in 2020, currently a software engineer at Retool.",
+        copy={[
+          "Graduated from Yale in May 2020, currently a software engineer at Retool.",
           "Previously at TrialSpark, Zillow, Snackpass.",
         ]}
       />
@@ -108,7 +108,7 @@ export const projects: Project[] = [
     ),
   },
   {
-    title: "paint.party",
+    id: "paint.party",
     icon: Icons.paintParty,
     backgroundColor: "#6236FF",
     foregroundColor: "#D8D8D8",
@@ -116,7 +116,7 @@ export const projects: Project[] = [
       <ProjectIconContent
         title={"Paint Party"}
         subtitle={"April 2020"}
-        p={[
+        copy={[
           "Collaborative mobile drawing game. Winner of Yale's Lohmann Design Prize.",
           "TypeScript, React Native, Firebase.",
         ]}
@@ -127,10 +127,12 @@ export const projects: Project[] = [
         title={"PaintParty"}
         subtitle={"April 2020"}
         images={[
+          { src: ProjectAssets.paintpartyDeepSea, caption: "canvases" },
           { src: ProjectAssets.paintpartyCanvases, caption: "canvases" },
           { src: ProjectAssets.paintpartyColorEditor, caption: "canvases" },
           { src: ProjectAssets.paintpartyDraw, caption: "canvases" },
           { src: ProjectAssets.paintpartyGallery, caption: "canvases" },
+          { src: ProjectAssets.paintpartyJoin, caption: "canvases" },
         ]}
         links={[
           { title: "website", uri: "https://paintparty.io" },
@@ -139,11 +141,16 @@ export const projects: Project[] = [
             uri: "https://apps.apple.com/tt/app/paint-party/id1504830265",
           },
         ]}
+        copy={[
+          "Draw pixel art with your friends in real time. Every canvas offers a unique experience with customizable size, background color, duration, and draw interval",
+          "Drawing only colors a single pixel. Each canvas limits how frequently authors draw, so it helps to communicate a plan!",
+          "Canvases can be exported to gifs that plot each pixel as it was drawn.",
+        ]}
       />
     ),
   },
   {
-    title: "unexpected",
+    id: "unexpected",
     icon: Icons.unexpected,
     backgroundColor: "#49E020",
     foregroundColor: "",
@@ -151,7 +158,7 @@ export const projects: Project[] = [
       <ProjectIconContent
         title={"Unexpected"}
         subtitle={"March 2020"}
-        p={[
+        copy={[
           "Senior thesis project. A photo sharing app that limits how often & when users can post.",
           "TypeScript, React Native, NodeJS, MongoDB.",
         ]}
@@ -172,7 +179,7 @@ export const projects: Project[] = [
     ),
   },
   {
-    title: "screentime",
+    id: "screentime",
     backgroundColor: "#007FFF",
     foregroundColor: "#D6EAFF",
     icon: Icons.screentime,
@@ -204,7 +211,7 @@ export const projects: Project[] = [
       <ProjectIconContent
         title={"Screentime"}
         subtitle={"October 2019"}
-        p={[
+        copy={[
           "Class project that generates a visualization of iOS screentime metrics. To better illustrate our behaviors.",
           "React, Processing.",
         ]}
@@ -212,7 +219,7 @@ export const projects: Project[] = [
     ),
   },
   {
-    title: "accordion",
+    id: "accordion",
     icon: Icons.accordion,
     backgroundColor: "",
     foregroundColor: "",
@@ -239,7 +246,7 @@ export const projects: Project[] = [
             title: "pdf",
           },
         ]}
-        p={[
+        copy={[
           "Project done for ART 469b: Advanced Graphic Design. Students chose a designer to write about in an 'accordion' format restricted only by the limitation of printing on a single side.",
           "My accordion (on Ralph Schraivogel) contains 5 sections: training & work, stylistic regularities, influence & context, Henry Van de Velde, and grayscale series. I designed the folding to accomodate a variety of opening possibilities which each allow for a different experience. The final product was produced on an Epson Inkjet large-format printer.",
         ]}
@@ -249,27 +256,24 @@ export const projects: Project[] = [
       <ProjectIconContent
         title={"Accordion"}
         subtitle={"March 2019"}
-        p={[
+        copy={[
           "Advanced Graphic Design mid-term project. An interactive accordion fold to view panes in many different combinations.",
         ]}
       />
     ),
   },
   {
-    title: "photos",
-    backgroundColor: "",
+    id: "photos",
+    backgroundColor: "#008CA6",
     foregroundColor: "",
     icon: Icons.photography,
     content: <div>hello!</div>,
     iconContent: (
-      <IconContentContainer>
-        <h2>Photography</h2>
-        <p>Selected photos.</p>
-      </IconContentContainer>
+      <ProjectIconContent title="Photography" copy={["Selected photos."]} />
     ),
   },
   {
-    title: "herd",
+    id: "herd",
     icon: Icons.herd,
     backgroundColor: "#872BD2",
     foregroundColor: "",
@@ -278,7 +282,7 @@ export const projects: Project[] = [
       <ProjectIconContent
         title={"Herd"}
         subtitle={"Summer 2019"}
-        p={[
+        copy={[
           "Socialized location sharing. Emphasis on large groups & anonymous background location sharing.",
           "React Native, Firebase.",
         ]}
@@ -286,24 +290,24 @@ export const projects: Project[] = [
     ),
   },
   {
-    title: "evently",
+    id: "evently",
     icon: Icons.evently,
     backgroundColor: "",
     foregroundColor: "",
     content: <div>hello!</div>,
     iconContent: (
-      <IconContentContainer>
-        <h2>Evently</h2>
-        <h3>Fall 2018</h3>
-        <p>
-          Software Engineering class project. Event API aggregator with
-          card-swiping interface. React Native, NodeJS, Firebase.
-        </p>
-      </IconContentContainer>
+      <ProjectIconContent
+        title="Evently"
+        subtitle={"Spring 2018"}
+        copy={[
+          "Software Engineering class project. Event API aggregator with card-swiping interface.",
+          "React Native, NodeJS, Firebase.",
+        ]}
+      />
     ),
   },
   {
-    title: "sesh",
+    id: "sesh",
     icon: Icons.sesh,
     backgroundColor: "#865EFF",
     foregroundColor: "",
@@ -312,12 +316,15 @@ export const projects: Project[] = [
       <ProjectIconContent
         title="Sesh"
         subtitle="Summer 2018"
-        p={["Event-based social app. Quickly notify friends of adhoc events."]}
+        copy={[
+          "Event-based social app. Quickly notify friends of adhoc events.",
+          "React Native, Firebase.",
+        ]}
       />
     ),
   },
   {
-    title: "twitterlytics",
+    id: "twitterlytics",
     backgroundColor: "",
     foregroundColor: "",
     icon: Icons.twitterlytics,
@@ -339,14 +346,15 @@ export const projects: Project[] = [
       <ProjectIconContent
         title="Twitterlytics"
         subtitle="December 2018"
-        p={[
+        copy={[
           "Dashboard for generating NLP reports on a twitter user. Sentiment score and content analysis.",
+          "React, Python, NLTK.",
         ]}
       />
     ),
   },
   {
-    title: "website",
+    id: "website",
     backgroundColor: "",
     foregroundColor: "",
     icon: Icons.website,
@@ -371,7 +379,7 @@ export const projects: Project[] = [
     iconContent: (
       <ProjectIconContent
         title="Personal Site"
-        p={["The old version of this website"]}
+        copy={["The old version of this website."]}
       />
     ),
   },

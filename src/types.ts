@@ -1,7 +1,7 @@
 import { Interpolation, SpringValue } from "react-spring";
 
 export type Project = {
-  title: string;
+  id: string;
   foregroundColor: string;
   backgroundColor: string;
   icon?: string;

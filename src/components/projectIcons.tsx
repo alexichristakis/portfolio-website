@@ -19,7 +19,6 @@ const INITIAL_SCALE = 1;
 
 interface IconProps extends Project {
   index: number;
-  id: string;
 }
 
 const NUM_PER_ROW = Math.floor(
@@ -32,7 +31,7 @@ const getInitialPosition = (index: number) => [
 ];
 
 export const Icon: React.FC<IconProps> = ({
-  title,
+  id,
   icon,
   iconContent,
   index,
@@ -57,7 +56,7 @@ export const Icon: React.FC<IconProps> = ({
   }));
 
   const { sourceRef, openWindow } = useWindows({
-    window: { title, icon, backgroundColor, foregroundColor, ...rest },
+    window: { id, icon, backgroundColor, foregroundColor, ...rest },
     handlers: {
       onOpen: () => setVisible({ visible: false, immediate: true }),
       onClose: () => setVisible({ visible: true, immediate: true }),
@@ -176,7 +175,7 @@ export const Icon: React.FC<IconProps> = ({
         <img
           className={`${ClassPrefix}__image`}
           draggable={false}
-          alt={`${title} icon`}
+          alt={`${id} icon`}
           src={icon}
         />
         {iconContent}
@@ -192,8 +191,8 @@ export const Icon: React.FC<IconProps> = ({
 
 export const ProjectIcons: React.FC = () => (
   <div className="projects">
-    {projects.map(({ title, ...rest }, idx) => (
-      <Icon key={title} id={title} index={idx} title={title} {...rest} />
+    {projects.map(({ id, ...rest }, idx) => (
+      <Icon key={id} id={id} index={idx} {...rest} />
     ))}
   </div>
 );
