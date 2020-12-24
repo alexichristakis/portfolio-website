@@ -6,7 +6,7 @@ import {
   ProjectProvider,
   CursorStateProvider,
 } from "./context";
-import { ProjectIcon, projects, Cursor } from "./components";
+import { ProjectIcons, Cursor } from "./components";
 import { PROJECT_SIZE, ICON_BORDER_RADIUS } from "./lib";
 
 import "./App.scss";
@@ -27,9 +27,7 @@ const App: React.FC = () => {
           }}
         >
           <WindowManagerProvider>
-            {Object.keys(projects).map((id, idx) => (
-              <ProjectIcon key={id} id={id} />
-            ))}
+            <ProjectIcons />
           </WindowManagerProvider>
         </div>
         <Cursor />

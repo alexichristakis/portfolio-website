@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { animated, to, useSpring } from "react-spring";
 import { useGesture } from "react-use-gesture";
 import cn from "classnames";
 
 import { setMultipleRefs, PROJECT_SIZE } from "../lib";
+import { ProjectContext } from "../context";
 import { useMeasure, useProject, useSkewAnimation, useWindows } from "../hooks";
 import ScrollBar from "./scrollbar";
 
@@ -172,5 +173,16 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
         visible={isHovered}
       />
     </animated.div>
+  );
+};
+
+export const ProjectIcons: React.FC = () => {
+  const { projects } = useContext(ProjectContext);
+  return (
+    <>
+      {Object.keys(projects).map((id, idx) => (
+        <ProjectIcon key={id} id={id} />
+      ))}
+    </>
   );
 };
