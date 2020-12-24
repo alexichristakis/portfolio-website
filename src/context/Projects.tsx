@@ -12,14 +12,13 @@ type Positions = {
   [key: string]: Vector3D;
 };
 
-type ProjectContext = {
+type ProjectContextShape = {
   projects: Projects;
   initialPositions: Positions;
 };
 
-export const ProjectContext = createContext({} as ProjectContext);
+export const ProjectContext = createContext({} as ProjectContextShape);
 
-const INITIAL_SCALE = 1;
 const MARGIN = 40;
 
 const NUM_PER_ROW = Math.floor(window.innerWidth / (PROJECT_SIZE + MARGIN * 2));

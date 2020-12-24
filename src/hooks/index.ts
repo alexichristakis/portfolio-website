@@ -9,6 +9,7 @@ export { useGestureOverrides } from "./useGestureOverrides";
 export { useSkewAnimation } from "./useSkewAnimation";
 export { useMeasure } from "./useMeasure";
 export { useProject } from "./useProject";
+export { useMountEffect } from "./useMountEffect";
 
 // type exports
 export type { Events } from "./useEvents";

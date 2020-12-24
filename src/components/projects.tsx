@@ -1,5 +1,3 @@
-import cn from "classnames";
-
 import { Icons, ProjectAssets } from "../assets";
 import { Project } from "../types";
 import Gallery, { GalleryProps } from "./gallery";

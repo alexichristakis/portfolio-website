@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 import { WindowManagerContext, WindowState } from "../context";
 import { useForcedUpdate } from "./useForcedUpdate";
+import { useMountEffect } from "./useMountEffect";
 
 type UseWindowEventsConfig = {
   events: WindowState[];
@@ -17,7 +18,7 @@ export const useWindowEvents = ({
   const update = useForcedUpdate();
   const { subscribe } = useContext(WindowManagerContext);
 
-  useEffect(() => {
+  useMountEffect(() => {
     const unsubscribe = subscribe((payload) => {
       const { type, id } = payload;
 
@@ -28,7 +29,7 @@ export const useWindowEvents = ({
     });
 
     return () => unsubscribe();
-  }, []);
+  });
 
   return { state };
 };

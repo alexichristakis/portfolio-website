@@ -1,5 +1,6 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { CursorStateContext, CursorEvent, CursorEventType } from "../context";
+import { useMountEffect } from "./useMountEffect";
 
 type CursorEventHandlers = {
   onLock?: (ev: CursorEvent) => void;
@@ -9,7 +10,7 @@ type CursorEventHandlers = {
 export const useCursorEvents = (handlers: CursorEventHandlers) => {
   const { subscribe, ...rest } = useContext(CursorStateContext);
 
-  useEffect(() => {
+  useMountEffect(() => {
     const unsubscribe = subscribe(({ type, target, position }) => {
       if (type === CursorEventType.LOCK) {
         handlers.onLock?.({ type, target, position });
@@ -21,7 +22,7 @@ export const useCursorEvents = (handlers: CursorEventHandlers) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  });
 
   return rest;
 };

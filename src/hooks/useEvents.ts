@@ -16,14 +16,17 @@ export const useEvents = <Payload extends BasePayload>(): Events<Payload> => {
     listeners.current.forEach((listener) => listener?.(payload));
   }, []);
 
-  const unsubscribe = (listener?: Listener<Payload>) => {
+  const unsubscribe = useCallback((listener?: Listener<Payload>) => {
     listeners.current = listeners.current.filter((l) => l !== listener);
-  };
-
-  const subscribe = useCallback((listener: Listener<Payload>) => {
-    listeners.current.push(listener);
-    return () => unsubscribe(listener);
   }, []);
+
+  const subscribe = useCallback(
+    (listener: Listener<Payload>) => {
+      listeners.current.push(listener);
+      return () => unsubscribe(listener);
+    },
+    [unsubscribe]
+  );
 
   return {
     send,

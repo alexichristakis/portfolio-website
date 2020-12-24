@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useContext, useRef } from "react";
 import { useGesture } from "react-use-gesture";
 import { useSpring } from "react-spring";
 
@@ -19,9 +19,9 @@ export const useLockedCursor = (
   handlers?: UseLockedCursorHandlers
 ): [ReturnType<typeof useGesture>, any] => {
   const lockedTarget = useRef<CursorTarget | null>(null);
-  const { position, pressed, lock, unlock } = useContext(CursorStateContext);
+  const { pressed, lock, unlock } = useContext(CursorStateContext);
 
-  const [style, setStyle] = useSpring(() => ({
+  const [style] = useSpring(() => ({
     scale: 1,
   }));
   // const xOffset = useTransform(position.x, (x) => {
@@ -66,7 +66,7 @@ export const useLockedCursor = (
   // });
 
   const bind = useGesture({
-    onMouseEnter: ({ event }) => {
+    onMouseEnter: () => {
       const rect = ref.current?.getBoundingClientRect();
       if (rect) {
         const target: CursorTarget = { rect, ...config };
@@ -76,7 +76,7 @@ export const useLockedCursor = (
 
       handlers?.onMouseEnter?.();
     },
-    onMouseLeave: ({ event }) => {
+    onMouseLeave: () => {
       const target = lockedTarget.current;
       if (
         target &&

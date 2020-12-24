@@ -1,9 +1,9 @@
-import { useCallback, useEffect, memo, useRef } from "react";
+import { memo, useRef } from "react";
 import { animated, useSpring, to } from "react-spring";
 import { useGesture } from "react-use-gesture";
 
 import { SVG } from "../assets/icons";
-import { useSkewAnimation, useMeasure } from "../hooks";
+import { useSkewAnimation, useMeasure, useMountEffect } from "../hooks";
 import { WindowConfig } from "../context";
 import { clamp, PROJECT_SIZE } from "../lib";
 import "./window.scss";
@@ -84,7 +84,7 @@ export const Window: React.FC<WindowProps> = memo(
       height: initialHeight,
     }));
 
-    useEffect(() => {
+    useMountEffect(() => {
       set({
         openAmount: 1,
         offsetX: (window.innerWidth - width.get()) / 2,
@@ -92,7 +92,7 @@ export const Window: React.FC<WindowProps> = memo(
         scaleX: 1,
         scaleY: 1,
       });
-    }, []);
+    });
 
     const { resetRotation, rotation, onMove, onHover } = useSkewAnimation({
       ref: windowRef,
@@ -182,7 +182,7 @@ export const Window: React.FC<WindowProps> = memo(
       { domTarget: contentRef, eventOptions: { passive: false } }
     );
 
-    const close = useCallback(() => {
+    const close = () => {
       isClosing.current = true;
 
       // stop width and height to get proper measurements below.
@@ -205,7 +205,7 @@ export const Window: React.FC<WindowProps> = memo(
           }).then(destroyWindow);
         }
       });
-    }, []);
+    };
 
     const translate = to(
       [offsetX, offsetY],

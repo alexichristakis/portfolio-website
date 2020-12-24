@@ -1,8 +1,6 @@
-import { createContext, useRef, useEffect } from "react";
+import { createContext, useRef } from "react";
 import { SpringValue, useSpring } from "react-spring";
 
-import { CURSOR_ZINDEX } from "../lib";
-import { Point2D, SpringPoint2D } from "../types";
 import { Events, useEvents } from "../hooks";
 import { useGesture } from "react-use-gesture";
 

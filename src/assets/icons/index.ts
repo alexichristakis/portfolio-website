@@ -10,7 +10,7 @@ import twitterlytics from "./twitterlytics.png";
 import website from "./website.png";
 import photography from "./photography.png";
 
-export default {
+const Icons = {
   paintParty,
   screentime,
   unexpected,
@@ -23,5 +23,7 @@ export default {
   website,
   photography,
 };
+
+export default Icons;
 
 export { SVG } from "./svg";

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useRef } from "react";
 
 import {
   WindowConfig,
@@ -6,6 +6,7 @@ import {
   WindowManagerContext,
   WindowState,
 } from "../context";
+import { useMountEffect } from "./useMountEffect";
 
 export type UseWindowConfig = {
   window: Omit<WindowConfig, "sourceRef">;
@@ -18,7 +19,7 @@ export const useWindows = ({ window, handlers }: UseWindowConfig) => {
     WindowManagerContext
   );
 
-  useEffect(() => {
+  useMountEffect(() => {
     registerWindow({ ...window, sourceRef });
 
     const unsubscribe = subscribe((payload) => {
@@ -38,7 +39,7 @@ export const useWindows = ({ window, handlers }: UseWindowConfig) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  });
 
   return {
     openWindow: () => openWindow(window.id),

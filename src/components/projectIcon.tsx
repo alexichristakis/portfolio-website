@@ -1,11 +1,17 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useContext } from "react";
 import { animated, to, useSpring } from "react-spring";
 import { useGesture } from "react-use-gesture";
 import cn from "classnames";
 
 import { setMultipleRefs, PROJECT_SIZE } from "../lib";
 import { ProjectContext } from "../context";
-import { useMeasure, useProject, useSkewAnimation, useWindows } from "../hooks";
+import {
+  useMeasure,
+  useMountEffect,
+  useProject,
+  useSkewAnimation,
+  useWindows,
+} from "../hooks";
 import ScrollBar from "./scrollbar";
 
 import "./projectIcon.scss";
@@ -40,9 +46,9 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
     scale: INITIAL_SCALE,
   }));
 
-  useEffect(() => {
+  useMountEffect(() => {
     set({ zoom: initialZoom });
-  }, []);
+  });
 
   const { sourceRef, openWindow } = useWindows({
     window: { id, icon, backgroundColor, foregroundColor, ...rest },

@@ -12,13 +12,13 @@ export interface GalleryProps {
 
 const ClassPrefix = "gallery";
 
-const GalleryImage: React.FC<Image> = ({ src, caption }) => {
+const GalleryImage: React.FC<Image> = ({ src, caption = "" }) => {
   return (
     <img
       className={`${ClassPrefix}__image`}
       draggable={false}
       src={src}
-      alt="project image"
+      alt={caption}
     />
   );
 };

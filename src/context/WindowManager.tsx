@@ -54,36 +54,48 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
     }
   }, []);
 
-  const handleWindowOpen = useCallback((id: string) => {
-    send({ type: WindowState.OPEN, id });
-    registeredWindows.current[id].state = WindowState.OPEN;
-    requestAnimationFrame(() => {
-      setOpenWindows((prev) => [...prev, id]);
-    });
-  }, []);
+  const handleWindowOpen = useCallback(
+    (id: string) => {
+      send({ type: WindowState.OPEN, id });
+      registeredWindows.current[id].state = WindowState.OPEN;
+      requestAnimationFrame(() => {
+        setOpenWindows((prev) => [...prev, id]);
+      });
+    },
+    [send]
+  );
 
-  const openWindow = useCallback((id: string) => {
-    const window = registeredWindows.current[id];
-    if (window) {
-      const { state } = window;
-      if (state !== WindowState.OPEN) {
-        handleWindowOpen(id);
+  const openWindow = useCallback(
+    (id: string) => {
+      const window = registeredWindows.current[id];
+      if (window) {
+        const { state } = window;
+        if (state !== WindowState.OPEN) {
+          handleWindowOpen(id);
+        }
       }
-    }
-  }, []);
+    },
+    [handleWindowOpen]
+  );
 
-  const requestClose = useCallback((id: string) => {
-    send({ type: WindowState.CLOSING, id });
-    registeredWindows.current[id].state = WindowState.CLOSING;
-  }, []);
+  const requestClose = useCallback(
+    (id: string) => {
+      send({ type: WindowState.CLOSING, id });
+      registeredWindows.current[id].state = WindowState.CLOSING;
+    },
+    [send]
+  );
 
-  const closeWindow = useCallback((id: string) => {
-    send({ type: WindowState.CLOSED, id });
-    registeredWindows.current[id].state = WindowState.CLOSED;
-    requestAnimationFrame(() => {
-      setOpenWindows((prev) => prev.filter((window) => window !== id));
-    });
-  }, []);
+  const closeWindow = useCallback(
+    (id: string) => {
+      send({ type: WindowState.CLOSED, id });
+      registeredWindows.current[id].state = WindowState.CLOSED;
+      requestAnimationFrame(() => {
+        setOpenWindows((prev) => prev.filter((window) => window !== id));
+      });
+    },
+    [send]
+  );
 
   const state = useMemo(
     () => ({
@@ -92,7 +104,7 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
       closeWindow,
       registerWindow,
     }),
-    []
+    [subscribe, openWindow, closeWindow, registerWindow]
   );
 
   return (

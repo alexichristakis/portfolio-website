@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useMountEffect } from "./useMountEffect";
 
 export const useGestureOverrides = () => {
-  useEffect(() => {
+  useMountEffect(() => {
     const preventDefault = (e: Event) => e.preventDefault();
     document.addEventListener("gesturestart", preventDefault);
     document.addEventListener("gesturechange", preventDefault);
@@ -10,5 +10,5 @@ export const useGestureOverrides = () => {
       document.removeEventListener("gesturestart", preventDefault);
       document.removeEventListener("gesturechange", preventDefault);
     };
-  }, []);
+  });
 };

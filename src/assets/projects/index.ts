@@ -29,7 +29,7 @@ import accordion7 from "./accordion/7.png";
 import accordion8 from "./accordion/8.png";
 import accordionFull from "./accordion/full.png";
 
-export default {
+const ProjectAssets = {
   resume,
 
   paintpartyCanvases,
@@ -61,3 +61,5 @@ export default {
   accordion8,
   accordionFull,
 };
+
+export default ProjectAssets;

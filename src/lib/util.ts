@@ -1,15 +1,6 @@
 import { Ref, MutableRefObject } from "react";
 import { Vector2D, SpringVector2D } from "../types";
 
-export const setStyleProperties = (
-  element: HTMLElement | null,
-  properties: { [style: string]: string }
-) => {
-  Object.entries(properties).map(([style, value]) => {
-    element?.style.setProperty(style, value);
-  });
-};
-
 export const setMultipleRefs = <RefType = any>(
   ...refs: ReadonlyArray<Ref<RefType>>
 ) => (element: RefType) => {

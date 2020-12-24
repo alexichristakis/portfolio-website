@@ -1,7 +1,6 @@
-import { useRef } from "react";
+// import { useRef } from "react";
 import { useSpring, animated } from "react-spring";
 
-import { Point2D, Rect } from "../types";
 import { useCursorEvents } from "../hooks";
 import "./cursor.scss";
 
@@ -30,8 +29,8 @@ const ClassPrefix = "cursor";
 // ];
 
 export const Cursor: React.FC = () => {
-  const targetWasDragged = useRef(false);
-  const [cursorStyle, set] = useSpring(() => ({
+  // const targetWasDragged = useRef(false);
+  const [cursorStyle] = useSpring(() => ({
     offsetX: 0,
     offsetY: 0,
     width: CURSOR_SIZE,
@@ -42,7 +41,7 @@ export const Cursor: React.FC = () => {
   // const width = useMotionValue(CURSOR_SIZE);
   // const height = useMotionValue(CURSOR_SIZE);
 
-  const { position, pressed, target } = useCursorEvents({
+  const { position } = useCursorEvents({
     // onLock: ({ target }) => {
     //   targetWasDragged.current = false;
     //   const { rect, scale = 1 } = target;
@@ -87,16 +86,16 @@ export const Cursor: React.FC = () => {
   });
 
   const transform = (prevX: number, prevY: number) => {
-    const rect = target.current?.rect;
-    const throttle = target.current?.throttle ?? true;
-    const draggable = target.current?.draggable;
-    const isPressed = !!pressed.current;
+    // const rect = target.current?.rect;
+    // const throttle = target.current?.throttle ?? true;
+    // const draggable = target.current?.draggable;
+    // const isPressed = !!pressed.current;
 
     let x = prevX;
     let y = prevY;
 
-    const offsetX = cursorStyle.offsetX.get();
-    const offsetY = cursorStyle.offsetY.get();
+    // const offsetX = cursorStyle.offsetX.get();
+    // const offsetY = cursorStyle.offsetY.get();
 
     return `translate(${x}px, ${y}px)`;
   };
