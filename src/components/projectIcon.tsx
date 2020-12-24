@@ -4,33 +4,32 @@ import { useGesture } from "react-use-gesture";
 import cn from "classnames";
 
 import { Project } from "../types";
-import { WindowState } from "../context";
 import { setMultipleRefs, PROJECT_SIZE } from "../lib";
 import { useMeasure, useSkewAnimation, useWindows } from "../hooks";
-import { projects } from "./projects";
 import ScrollBar from "./scrollbar";
 
-import "./projectIcons.scss";
+import "./projectIcon.scss";
 
 const PROJECT_MARGIN = 40;
 const HOVER_SCALE = 1.4;
 const CLICK_SCALE = 1.2;
 const INITIAL_SCALE = 1;
 
-interface IconProps extends Project {
+interface ProjectIconProps extends Project {
   index: number;
 }
 
 const NUM_PER_ROW = Math.floor(
   window.innerWidth / (PROJECT_SIZE + PROJECT_MARGIN * 2)
 );
+
 const getInitialPosition = (index: number) => [
   (index % NUM_PER_ROW) * (PROJECT_SIZE + PROJECT_MARGIN * 2) + PROJECT_MARGIN,
   Math.floor(index / NUM_PER_ROW) * (PROJECT_SIZE + PROJECT_MARGIN * 2) +
     PROJECT_MARGIN,
 ];
 
-export const Icon: React.FC<IconProps> = ({
+export const ProjectIcon: React.FC<ProjectIconProps> = ({
   id,
   icon,
   iconContent,
@@ -44,7 +43,7 @@ export const Icon: React.FC<IconProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const isDragSession = useRef(false);
 
-  const { height: contentHeight } = useMeasure(contentRef);
+  const [{ height: contentHeight }] = useMeasure(contentRef);
 
   const [{ visible }, setVisible] = useSpring(() => ({ visible: true }));
   const [{ xy, rz, scroll, zoom, scale }, set] = useSpring(() => ({
@@ -188,11 +187,3 @@ export const Icon: React.FC<IconProps> = ({
     </animated.div>
   );
 };
-
-export const ProjectIcons: React.FC = () => (
-  <div className="projects">
-    {projects.map(({ id, ...rest }, idx) => (
-      <Icon key={id} id={id} index={idx} {...rest} />
-    ))}
-  </div>
-);

@@ -3,7 +3,7 @@ import { animated, useSpring, to } from "react-spring";
 import { useGesture } from "react-use-gesture";
 
 import { SVG } from "../assets/icons";
-import { useSkewAnimation } from "../hooks";
+import { useSkewAnimation, useMeasure } from "../hooks";
 import { WindowConfig } from "../context";
 import { clamp, PROJECT_SIZE } from "../lib";
 import "./window.scss";
@@ -15,7 +15,23 @@ interface WindowProps extends WindowConfig {
 
 const WINDOW_WIDTH = 500;
 const WINDOW_HEIGHT = 400;
+const WINDOW_MARGIN = 20;
 
+const getNextOffset = (
+  prevOffset: number,
+  prevSize: number,
+  nextSize: number,
+  container: number
+) => {
+  const diff = (nextSize - prevSize) / 2;
+  let nextOffset = prevOffset - diff;
+  if (nextOffset + nextSize > container) {
+    nextOffset = nextOffset - diff;
+  }
+  return nextOffset < 0 ? prevOffset : nextOffset;
+};
+
+const cn = "window";
 export const Window: React.FC<WindowProps> = memo(
   ({
     id,
@@ -32,21 +48,36 @@ export const Window: React.FC<WindowProps> = memo(
     const windowRef = useRef<HTMLDivElement>(null);
     const isClosing = useRef(false);
 
-    const getSourceRect = () => sourceRef.current?.getBoundingClientRect()!;
+    const [, measureSourceRect] = useMeasure(sourceRef, false);
 
     const initialWidth = WINDOW_WIDTH;
     const initialHeight = aspectRatio
       ? initialWidth * aspectRatio
       : WINDOW_HEIGHT;
 
-    const initialRect = getSourceRect();
+    /* functions in case the window size changes*/
+    const getMaxSize = (innerWidth: number, innerHeight: number) => [
+      aspectRatio
+        ? aspectRatio * innerWidth > innerHeight
+          ? (innerHeight - WINDOW_MARGIN) / aspectRatio
+          : innerWidth - WINDOW_MARGIN
+        : innerWidth - WINDOW_MARGIN,
+      aspectRatio
+        ? aspectRatio * innerWidth > innerHeight
+          ? innerHeight - WINDOW_MARGIN
+          : aspectRatio * (innerWidth - WINDOW_MARGIN)
+        : innerHeight - WINDOW_MARGIN,
+    ];
+
+    const initialRect = measureSourceRect();
     const [
       { openAmount, width, height, scaleX, scaleY, offsetX, offsetY },
       set,
+      stop,
     ] = useSpring(() => ({
       openAmount: 0,
-      offsetX: initialRect.left,
-      offsetY: initialRect.top,
+      offsetX: initialRect.x,
+      offsetY: initialRect.y,
       scaleX: initialRect.width / initialWidth,
       scaleY: initialRect.height / initialHeight,
       width: initialWidth,
@@ -111,27 +142,14 @@ export const Window: React.FC<WindowProps> = memo(
 
           const prevWidth = width.get();
           const prevHeight = height.get();
-          const scale = 1 - d / 5;
 
-          const nextWidth = clamp(
-            prevWidth * scale,
-            initialWidth,
-            aspectRatio
-              ? aspectRatio * window.innerWidth > window.innerHeight
-                ? (window.innerHeight - 20) / aspectRatio
-                : window.innerWidth - 20
-              : window.innerWidth - 20
-          );
+          const s = 1 - d / 50;
 
-          const nextHeight = clamp(
-            prevHeight * scale,
-            initialHeight,
-            aspectRatio
-              ? aspectRatio * window.innerWidth > window.innerHeight
-                ? window.innerHeight - 20
-                : aspectRatio * (window.innerWidth - 20)
-              : window.innerHeight - 20
-          );
+          const { innerWidth, innerHeight } = window;
+
+          const [maxWidth, maxHeight] = getMaxSize(innerWidth, innerHeight);
+          const nextWidth = clamp(prevWidth * s, initialWidth, maxWidth);
+          const nextHeight = clamp(prevHeight * s, initialHeight, maxHeight);
 
           if (
             vd < 0 &&
@@ -142,10 +160,21 @@ export const Window: React.FC<WindowProps> = memo(
             cancel();
           } else {
             set({
-              offsetX: (window.innerWidth - nextWidth) / 2,
-              offsetY: (window.innerHeight - nextHeight) / 2,
+              offsetX: getNextOffset(
+                offsetX.get(),
+                prevWidth,
+                nextWidth,
+                innerWidth
+              ),
+              offsetY: getNextOffset(
+                offsetY.get(),
+                prevHeight,
+                nextHeight,
+                innerHeight
+              ),
               width: nextWidth,
               height: nextHeight,
+              immediate: true,
             });
           }
         },
@@ -155,18 +184,22 @@ export const Window: React.FC<WindowProps> = memo(
 
     const close = useCallback(() => {
       isClosing.current = true;
+
+      // stop width and height to get proper measurements below.
+      stop(["width", "height"]);
+
       onRequestClose();
       resetRotation();
       requestAnimationFrame(() => {
-        const destRect = getSourceRect();
+        const destRect = measureSourceRect();
         if (destRect) {
           const scaleXDest = destRect.width / width.get();
           const scaleYDest = destRect.height / height.get();
 
           set({
             openAmount: 0,
-            offsetX: destRect.left,
-            offsetY: destRect.top,
+            offsetX: destRect.x,
+            offsetY: destRect.y,
             scaleX: scaleXDest,
             scaleY: scaleYDest,
           }).then(destroyWindow);
@@ -203,15 +236,14 @@ export const Window: React.FC<WindowProps> = memo(
       output: [0, 0, 1],
     });
 
-    const Prefix = "window";
     return (
       <animated.div
         ref={windowRef}
-        className={`${Prefix}__container`}
+        className={`${cn}__container`}
         style={{ width, height, transform: translate }}
       >
         <animated.img
-          className={`${Prefix}__icon`}
+          className={`${cn}__icon`}
           alt={`${id} project-icon`}
           style={{
             // @ts-ignore
@@ -220,13 +252,10 @@ export const Window: React.FC<WindowProps> = memo(
           }}
           src={icon}
         />
-        <animated.div
-          className={Prefix}
-          style={{ transform: contentTransform }}
-        >
+        <animated.div className={cn} style={{ transform: contentTransform }}>
           <animated.div
             ref={contentRef}
-            className={`${Prefix}__content`}
+            className={`${cn}__content`}
             style={{
               // @ts-ignore
               opacity: contentOpacity,
@@ -236,7 +265,7 @@ export const Window: React.FC<WindowProps> = memo(
             }}
           >
             {content}
-            <SVG.Close className={`${Prefix}__close`} onClick={close} />
+            <SVG.Close className={`${cn}__close`} onClick={close} />
           </animated.div>
         </animated.div>
       </animated.div>

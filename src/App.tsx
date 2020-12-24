@@ -2,13 +2,14 @@ import { CSSProperties } from "react";
 
 import { useGestureOverrides } from "./hooks";
 import { WindowManagerProvider, CursorStateProvider } from "./context";
-import { ProjectIcons, Cursor } from "./components";
+import { ProjectIcon, projects, Cursor } from "./components";
 import { PROJECT_SIZE, ICON_BORDER_RADIUS } from "./lib";
 
 import "./App.scss";
 
 const App: React.FC = () => {
   useGestureOverrides();
+
   return (
     <CursorStateProvider>
       <div
@@ -21,7 +22,9 @@ const App: React.FC = () => {
         }}
       >
         <WindowManagerProvider>
-          <ProjectIcons />
+          {projects.map(({ id, ...rest }, idx) => (
+            <ProjectIcon key={id} id={id} index={idx} {...rest} />
+          ))}
         </WindowManagerProvider>
       </div>
       <Cursor />

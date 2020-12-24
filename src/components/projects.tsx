@@ -8,12 +8,7 @@ import "./projects.scss";
 const ClassPrefix = "project";
 
 const IconContentContainer: React.FC = ({ children }) => (
-  <div className={`${ClassPrefix}__icon-content`}>
-    {children}
-    <div className={`${ClassPrefix}__icon-content-banner`}>
-      <h3>Click for more</h3>
-    </div>
-  </div>
+  <div className={`${ClassPrefix}__icon-content`}>{children}</div>
 );
 
 const Container: React.FC = ({ children }) => (
@@ -39,7 +34,11 @@ type LinksProps = { links: { title: string; uri: string }[] };
 const Links: React.FC<LinksProps> = ({ links }) => (
   <div className={`${ClassPrefix}__links`}>
     {links.map(({ title, uri }) => (
-      <h2 className={`${ClassPrefix}__link`} onClick={() => window.open(uri)}>
+      <h2
+        key={title}
+        className={`${ClassPrefix}__link`}
+        onClick={() => window.open(uri)}
+      >
         {title}
       </h2>
     ))}
@@ -58,8 +57,8 @@ const ProjectContent: React.FC<ProjectContentProps> = ({
     <Gallery images={images} />
     <Header title={title} subtitle={subtitle} links={links} />
     <div className={`${ClassPrefix}__body`}>
-      {copy.map((p) => (
-        <p>{p}</p>
+      {copy.map((p, idx) => (
+        <p key={idx}>{p}</p>
       ))}
     </div>
   </Container>
@@ -78,8 +77,8 @@ const ProjectIconContent: React.FC<ProjectIconContentProps> = ({
   <IconContentContainer>
     {title && <h2>{title}</h2>}
     {subtitle && <h3>{subtitle}</h3>}
-    {copy.map((p) => (
-      <p>{p}</p>
+    {copy.map((p, idx) => (
+      <p key={idx}>{p}</p>
     ))}
   </IconContentContainer>
 );

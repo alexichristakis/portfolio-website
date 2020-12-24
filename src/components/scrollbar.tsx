@@ -21,7 +21,7 @@ const ScrollBar: React.FC<ScrollBarProps> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const { opacity } = useSpring({ opacity: visible ? 1 : 0 });
-  const { height } = useMeasure(ref);
+  const [{ height }] = useMeasure(ref);
 
   const scroll = offset
     .to({

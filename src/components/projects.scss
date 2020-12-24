@@ -2,8 +2,7 @@
   &__container {
     overflow-x: hidden;
     overflow-y: scroll;
-    width: 100%;
-    height: 100%;
+    padding-bottom: var(--spacing-16);
 
     h1 {
       font-size: var(--font-size-72);
@@ -14,7 +13,7 @@
     }
 
     p {
-      margin-top: 10px;
+      margin-top: var(--spacing-12);
       font-size: var(--font-size-16);
     }
   }
@@ -23,10 +22,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    padding: 20px;
-
-    a {
-    }
+    padding: var(--spacing-16);
   }
 
   &__link {
@@ -45,6 +41,8 @@
   }
 
   &__icon-content {
+    padding-bottom: var(--spacing-12);
+
     h2 {
       font-size: var(--font-size-24);
     }
@@ -54,20 +52,8 @@
     }
 
     p {
-      margin-top: 5px;
+      margin-top: var(--spacing-4);
       font-size: var(--font-size-10);
-    }
-
-    &-banner {
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      margin-top: 10px;
-      background-color: var(--project-background);
-      color: var(--project-foreground);
     }
   }
 }

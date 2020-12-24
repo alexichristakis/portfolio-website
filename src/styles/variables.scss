@@ -1,32 +1,10 @@
 :root {
-  // Typography
-  --sans-serif: "Inter", -apple-system, BlinkMacSystemFont, system-ui,
-    "Segoe UI", "Roboto", "Helvetica Neue", "Ubuntu", sans-serif;
-  --monospace: "Roboto Mono", SFMono, consolas, monaco, monospace;
+  --font-size-72: 72pt;
+  --font-size-24: 1.5rem;
+  --font-size-16: 1rem;
+  --font-size-12: 0.75rem;
+  --font-size-10: 0.625rem;
 
-  --font-size-72: 72pt; /* 24 */
-  --font-size-24: 1.5rem; /* 24 */
-  --font-size-20: 1.25rem; /* 20 */
-  --font-size-18: 1.125rem; /* 16 */
-  --font-size-16: 1rem; /* 16 */
-  --font-size-14: 0.875rem; /* 14 */
-  --font-size-12: 0.75rem; /* 12 */
-  --font-size-11: 11px; /* 11 */
-  --font-size-10: 0.625rem; /* 10 */
-
-  --line-height-solid: 1;
-
-  --line-height-32: 2rem;
-  --line-height-28: 1.75rem;
-  --line-height-24: 1.5rem;
-  --line-height-20: 1.25rem;
-  --line-height-16: 1rem;
-  --line-height-14: 0.875rem;
-  --line-height-12: 0.75rem;
-
-  // Colors
-  --white: white;
-  --black: black;
   --near-white: #f5f5f5;
   --near-black: #262626;
 
@@ -40,59 +18,15 @@
   --faint-gray: #ededed;
   --fainter-gray: #fafafa;
 
-  --dark-blue: #247bc7;
-  --blue: #3c92dc;
-  --light-blue: #4aa1ed;
-  --lightest-blue: #85c1f4;
-  --washed-blue: #daecfc;
-  --faint-blue: #ecf5fd;
-  --fainter-blue: #f7fafc;
-
-  --dark-red: #c04035;
-  --red: #cc5248;
-  --light-red: #d96459;
-  --lightest-red: #e07f76;
-  --washed-red: #f7d6d4;
-  --faint-red: #fdf3f2;
-
-  --dark-green: #3b734f;
-  --green: #478b60;
-  --light-green: #55a874;
-  --lightest-green: #82bf99;
-  --washed-green: #aed6bd;
-  --faint-green: #daece1;
-
-  --dark-yellow: #d69d10;
-  --yellow: #e9ab11;
-  --light-yellow: #f2bd3b;
-  --lightest-yellow: #eeca86;
-  --washed-yellow: #f6e5c4;
-  --faint-yellow: #fcf5e9;
-
-  --default-ring: 0 0 0 1px var(--washed-gray);
-  --hover-ring: 0 0 0 1px var(--lightest-blue);
-  --focus-ring: 0 0 0 1px var(--lightest-blue), 0 0 0 4px var(--washed-blue);
-  --error-ring: 0 0 0 1px var(--lightest-red), 0 0 0 4px var(--faint-red);
-  --error-default-ring: 0 0 0 1px var(--lightest-red);
-  --inset-default-ring: inset 0 0 0 1px var(--washed-gray);
-  --inset-hover-ring: inset 0 0 0 1px var(--lightest-blue);
-  --inset-focus-ring: inset 0 0 0 1px var(--lightest-blue),
-    0 0 0 4px var(--washed-blue);
-  --inset-error-ring: inset 0 0 0 1px var(--lightest-red),
-    0 0 0 4px var(--faint-red);
-  --inset-error-default-ring: inset 0 0 0 1px var(--lightest-red);
-
   // Spacing
-  --spacing-2: 0.125rem;
-  --spacing-4: 0.25rem;
-  --spacing-8: 0.5rem;
-  --spacing-10: 0.625rem;
-  --spacing-12: 0.75rem;
-  --spacing-16: 1rem;
+  --spacing-2: 2px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
 
-  --spacing-20: 1.25rem;
-  --spacing-24: 1.5rem;
-  --spacing-28: 1.75rem;
-  --spacing-32: 2rem;
-  --spacing-36: 2.25rem;
+  // Shadows
+  --large-shadow: 0 8px 30px rgba(14, 21, 47, 0.3);
+  --super-shadow: 0 45px 100px rgba(14, 21, 47, 0.2),
+    0 16px 40px rgba(14, 21, 47, 0.1);
 }
