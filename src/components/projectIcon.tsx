@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { animated, to, useSpring } from "react-spring";
 import { useGesture } from "react-use-gesture";
 import cn from "classnames";
@@ -25,7 +25,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
 
   const [
     { icon, iconContent, backgroundColor, foregroundColor, ...rest },
-    [initialX, initialY],
+    [initialX, initialY, initialZoom],
   ] = useProject(id);
 
   const [{ height: contentHeight }] = useMeasure(contentRef);
@@ -34,10 +34,14 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
   const [{ xy, rz, scroll, zoom, scale }, set] = useSpring(() => ({
     xy: [0, 0],
     rz: 0,
-    zoom: 0,
     scroll: 0,
+    zoom: 0,
     scale: INITIAL_SCALE,
   }));
+
+  useEffect(() => {
+    set({ zoom: initialZoom });
+  }, []);
 
   const { sourceRef, openWindow } = useWindows({
     window: { id, icon, backgroundColor, foregroundColor, ...rest },
