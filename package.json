@@ -2,7 +2,7 @@
   "name": "portfolio-website",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://alexi.site",
+  "homepage": "https://alexi.site",
   "dependencies": {
     "classnames": "^2.2.6",
     "react": "^17.0.1",
