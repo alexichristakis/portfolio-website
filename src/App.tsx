@@ -1,7 +1,11 @@
 import { CSSProperties } from "react";
 
 import { useGestureOverrides } from "./hooks";
-import { WindowManagerProvider, CursorStateProvider } from "./context";
+import {
+  WindowManagerProvider,
+  ProjectProvider,
+  CursorStateProvider,
+} from "./context";
 import { ProjectIcon, projects, Cursor } from "./components";
 import { PROJECT_SIZE, ICON_BORDER_RADIUS } from "./lib";
 
@@ -12,22 +16,24 @@ const App: React.FC = () => {
 
   return (
     <CursorStateProvider>
-      <div
-        className="app-container"
-        style={{
-          ...({
-            "--project-size": `${PROJECT_SIZE}px`,
-            "--icon-border-radius": `${ICON_BORDER_RADIUS}px`,
-          } as CSSProperties),
-        }}
-      >
-        <WindowManagerProvider>
-          {projects.map(({ id, ...rest }, idx) => (
-            <ProjectIcon key={id} id={id} index={idx} {...rest} />
-          ))}
-        </WindowManagerProvider>
-      </div>
-      <Cursor />
+      <ProjectProvider>
+        <div
+          className="app-container"
+          style={{
+            ...({
+              "--project-size": `${PROJECT_SIZE}px`,
+              "--icon-border-radius": `${ICON_BORDER_RADIUS}px`,
+            } as CSSProperties),
+          }}
+        >
+          <WindowManagerProvider>
+            {Object.keys(projects).map((id, idx) => (
+              <ProjectIcon key={id} id={id} />
+            ))}
+          </WindowManagerProvider>
+        </div>
+        <Cursor />
+      </ProjectProvider>
     </CursorStateProvider>
   );
 };

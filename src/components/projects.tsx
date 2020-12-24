@@ -83,9 +83,8 @@ const ProjectIconContent: React.FC<ProjectIconContentProps> = ({
   </IconContentContainer>
 );
 
-export const projects: Project[] = [
-  {
-    id: "resume",
+export const projects: { [id: string]: Project } = {
+  resume: {
     icon: Icons.resume,
     aspectRatio: 1.294117647,
     backgroundColor: "#FFD60A",
@@ -106,8 +105,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "paint.party",
+  paintparty: {
     icon: Icons.paintParty,
     backgroundColor: "#6236FF",
     foregroundColor: "#D8D8D8",
@@ -148,8 +146,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "unexpected",
+  unexpected: {
     icon: Icons.unexpected,
     backgroundColor: "#49E020",
     foregroundColor: "",
@@ -177,8 +174,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "screentime",
+  screentime: {
     backgroundColor: "#007FFF",
     foregroundColor: "#D6EAFF",
     icon: Icons.screentime,
@@ -217,8 +213,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "accordion",
+  accordion: {
     icon: Icons.accordion,
     backgroundColor: "",
     foregroundColor: "",
@@ -261,8 +256,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "photos",
+  photos: {
     backgroundColor: "#008CA6",
     foregroundColor: "",
     icon: Icons.photography,
@@ -271,8 +265,7 @@ export const projects: Project[] = [
       <ProjectIconContent title="Photography" copy={["Selected photos."]} />
     ),
   },
-  {
-    id: "herd",
+  herd: {
     icon: Icons.herd,
     backgroundColor: "#872BD2",
     foregroundColor: "",
@@ -288,8 +281,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "evently",
+  evently: {
     icon: Icons.evently,
     backgroundColor: "",
     foregroundColor: "",
@@ -305,8 +297,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "sesh",
+  sesh: {
     icon: Icons.sesh,
     backgroundColor: "#865EFF",
     foregroundColor: "",
@@ -322,8 +313,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "twitterlytics",
+  twitterlytics: {
     backgroundColor: "",
     foregroundColor: "",
     icon: Icons.twitterlytics,
@@ -352,8 +342,7 @@ export const projects: Project[] = [
       />
     ),
   },
-  {
-    id: "website",
+  website: {
     backgroundColor: "",
     foregroundColor: "",
     icon: Icons.website,
@@ -382,4 +371,4 @@ export const projects: Project[] = [
       />
     ),
   },
-];
+} as const;

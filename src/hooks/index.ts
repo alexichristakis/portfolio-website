@@ -8,6 +8,7 @@ export { useEvents } from "./useEvents";
 export { useGestureOverrides } from "./useGestureOverrides";
 export { useSkewAnimation } from "./useSkewAnimation";
 export { useMeasure } from "./useMeasure";
+export { useProject } from "./useProject";
 
 // type exports
 export type { Events } from "./useEvents";

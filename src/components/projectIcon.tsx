@@ -3,45 +3,30 @@ import { animated, to, useSpring } from "react-spring";
 import { useGesture } from "react-use-gesture";
 import cn from "classnames";
 
-import { Project } from "../types";
 import { setMultipleRefs, PROJECT_SIZE } from "../lib";
-import { useMeasure, useSkewAnimation, useWindows } from "../hooks";
+import { useMeasure, useProject, useSkewAnimation, useWindows } from "../hooks";
 import ScrollBar from "./scrollbar";
 
 import "./projectIcon.scss";
 
-const PROJECT_MARGIN = 40;
 const HOVER_SCALE = 1.4;
 const CLICK_SCALE = 1.2;
 const INITIAL_SCALE = 1;
 
-interface ProjectIconProps extends Project {
-  index: number;
+interface ProjectIconProps {
+  id: string;
 }
 
-const NUM_PER_ROW = Math.floor(
-  window.innerWidth / (PROJECT_SIZE + PROJECT_MARGIN * 2)
-);
-
-const getInitialPosition = (index: number) => [
-  (index % NUM_PER_ROW) * (PROJECT_SIZE + PROJECT_MARGIN * 2) + PROJECT_MARGIN,
-  Math.floor(index / NUM_PER_ROW) * (PROJECT_SIZE + PROJECT_MARGIN * 2) +
-    PROJECT_MARGIN,
-];
-
-export const ProjectIcon: React.FC<ProjectIconProps> = ({
-  id,
-  icon,
-  iconContent,
-  index,
-  backgroundColor,
-  foregroundColor,
-  ...rest
-}) => {
+export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isDragSession = useRef(false);
+
+  const [
+    { icon, iconContent, backgroundColor, foregroundColor, ...rest },
+    [initialX, initialY],
+  ] = useProject(id);
 
   const [{ height: contentHeight }] = useMeasure(contentRef);
 
@@ -67,8 +52,6 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({
       openWindow();
     }
   };
-
-  const [initialX, initialY] = getInitialPosition(index);
 
   const position = xy.to((x, y) => [x + initialX, y + initialY]);
 

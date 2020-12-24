@@ -1,7 +1,6 @@
 import { Interpolation, SpringValue } from "react-spring";
 
 export type Project = {
-  id: string;
   foregroundColor: string;
   backgroundColor: string;
   icon?: string;
@@ -12,6 +11,7 @@ export type Project = {
 
 export type Point2D = [x: number, y: number];
 export type Vector2D = [number, number];
+export type Vector3D = [number, number, number];
 export type SpringPoint2D = [x: SpringValue<number>, y: SpringValue<number>];
 
 export type Rect = {

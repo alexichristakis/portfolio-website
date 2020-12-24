@@ -8,6 +8,7 @@ export {
   WindowState,
   WindowManagerContext,
 } from "./WindowManager";
+export { ProjectProvider, ProjectContext } from "./Projects";
 
 // Types
 export type {
