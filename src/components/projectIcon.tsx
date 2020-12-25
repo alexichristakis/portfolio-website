@@ -3,7 +3,7 @@ import { animated, to, useSpring } from "react-spring";
 import { useGesture } from "react-use-gesture";
 import cn from "classnames";
 
-import { setMultipleRefs, PROJECT_SIZE } from "../lib";
+import { setMultipleRefs, clamp, PROJECT_SIZE } from "../lib";
 import { ProjectContext } from "../context";
 import {
   useMeasure,
@@ -106,15 +106,6 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
           isDragSession.current = false;
         }, 1);
       },
-      onWheel: ({ hovering, delta: [, dy] }) => {
-        if (hovering) {
-          const next = Math.min(
-            Math.max(scroll.get() - dy * 5, -contentHeight + PROJECT_SIZE),
-            0
-          );
-          set({ scroll: next });
-        }
-      },
     },
     {
       domTarget: containerRef,
@@ -125,8 +116,27 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
 
   useGesture(
     {
-      onPinch: ({ offset: [d, a] }) => {
-        set({ zoom: d / 200, rz: a });
+      onPinch: ({ offset: [, rz], delta: [, d], cancel, canceled }) => {
+        if (canceled) return;
+
+        const prevZoom = zoom.get();
+        const nextZoom = clamp(prevZoom - d / 50, -0.5, 0.25);
+
+        if (nextZoom === 0.25) {
+          openWindow();
+          cancel();
+        } else {
+          set({ zoom: nextZoom, rz, immediate: true });
+        }
+      },
+      onWheel: ({ pinching, delta: [, dy] }) => {
+        if (isHovered && !pinching) {
+          const next = Math.min(
+            Math.max(scroll.get() - dy * 5, -contentHeight + PROJECT_SIZE),
+            0
+          );
+          set({ scroll: next });
+        }
       },
     },
     { domTarget: containerRef, eventOptions: { passive: false } }
@@ -183,10 +193,10 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
 };
 
 export const ProjectIcons: React.FC = () => {
-  const { projects } = useContext(ProjectContext);
+  const { projectIds } = useContext(ProjectContext);
   return (
     <>
-      {Object.keys(projects).map((id, idx) => (
+      {projectIds.map((id) => (
         <ProjectIcon key={id} id={id} />
       ))}
     </>

@@ -3,6 +3,7 @@ import { createContext, useMemo } from "react";
 import { Project, Vector2D, Vector3D } from "../types";
 import { projects } from "../components";
 import { clamp, PROJECT_SIZE } from "../lib";
+import { useMeasure } from "../hooks";
 
 type Projects = {
   [key: string]: Project;
@@ -13,6 +14,7 @@ type Positions = {
 };
 
 type ProjectContextShape = {
+  projectIds: string[];
   projects: Projects;
   initialPositions: Positions;
 };
@@ -108,9 +110,11 @@ const getInitialPosition = (index: number): Vector2D => [
 ];
 
 export const ProjectProvider: React.FC = ({ children }) => {
+  const projectIds = useMemo(() => Object.keys(projects), []);
+
   const initialPositions = useMemo(
     () =>
-      Object.keys(projects).reduce((positions, id, idx) => {
+      projectIds.reduce((positions, id, idx) => {
         positions[id] = getPosition(idx, positions);
 
         return positions;
@@ -119,7 +123,7 @@ export const ProjectProvider: React.FC = ({ children }) => {
   );
 
   return (
-    <ProjectContext.Provider value={{ projects, initialPositions }}>
+    <ProjectContext.Provider value={{ projectIds, projects, initialPositions }}>
       {children}
     </ProjectContext.Provider>
   );

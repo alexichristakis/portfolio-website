@@ -47,6 +47,7 @@ export const Window: React.FC<WindowProps> = memo(
     const contentRef = useRef<HTMLDivElement>(null);
     const windowRef = useRef<HTMLDivElement>(null);
     const isClosing = useRef(false);
+    const isOpening = useRef(true);
 
     const [, measureSourceRect] = useMeasure(sourceRef, false);
 
@@ -91,7 +92,7 @@ export const Window: React.FC<WindowProps> = memo(
         offsetY: (window.innerHeight - height.get()) / 2,
         scaleX: 1,
         scaleY: 1,
-      });
+      }).then(() => (isOpening.current = false));
     });
 
     const { resetRotation, rotation, onMove, onHover } = useSkewAnimation({
@@ -138,7 +139,7 @@ export const Window: React.FC<WindowProps> = memo(
     useGesture(
       {
         onPinch: ({ delta: [, d], velocities: [vd], canceled, cancel }) => {
-          if (canceled || isClosing.current) return;
+          if (canceled || isClosing.current || isOpening.current) return;
 
           const prevWidth = width.get();
           const prevHeight = height.get();

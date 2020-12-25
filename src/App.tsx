@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { CSSProperties, useRef } from "react";
 
 import { useGestureOverrides } from "./hooks";
 import {
@@ -12,12 +12,15 @@ import { PROJECT_SIZE, ICON_BORDER_RADIUS } from "./lib";
 import "./App.scss";
 
 const App: React.FC = () => {
-  useGestureOverrides();
+  const ref = useRef<HTMLDivElement>(null);
+
+  useGestureOverrides(ref);
 
   return (
     <CursorStateProvider>
       <ProjectProvider>
         <div
+          ref={ref}
           className="app-container"
           style={{
             ...({
