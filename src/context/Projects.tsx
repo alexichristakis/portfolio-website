@@ -5,6 +5,8 @@ import { projects } from "../components";
 import { clamp, PROJECT_SIZE } from "../lib";
 import { useMeasure } from "../hooks";
 
+const projectIds = Object.keys(projects);
+
 type Projects = {
   [key: string]: Project;
 };
@@ -110,8 +112,6 @@ const getInitialPosition = (index: number): Vector2D => [
 ];
 
 export const ProjectProvider: React.FC = ({ children }) => {
-  const projectIds = useMemo(() => Object.keys(projects), []);
-
   const initialPositions = useMemo(
     () =>
       projectIds.reduce((positions, id, idx) => {
