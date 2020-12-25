@@ -1,6 +1,10 @@
+import { usePinch } from "react-use-gesture";
 import { useMountEffect } from "./useMountEffect";
 
-export const useGestureOverrides = () => {
+export const useGestureOverrides = (ref: React.RefObject<HTMLElement>) => {
+  // hack here to prevent user from zooming the main viewport
+  usePinch(() => {}, { domTarget: ref, eventOptions: { passive: false } });
+
   useMountEffect(() => {
     const preventDefault = (e: Event) => e.preventDefault();
     document.addEventListener("gesturestart", preventDefault);
