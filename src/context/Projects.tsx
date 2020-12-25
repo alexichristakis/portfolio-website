@@ -3,7 +3,6 @@ import { createContext, useMemo } from "react";
 import { Project, Vector2D, Vector3D } from "../types";
 import { projects } from "../components";
 import { clamp, PROJECT_SIZE } from "../lib";
-import { useMeasure } from "../hooks";
 
 const projectIds = Object.keys(projects);
 
