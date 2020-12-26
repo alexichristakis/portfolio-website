@@ -9,6 +9,11 @@ export {
   WindowManagerContext,
 } from "./WindowManager";
 export { ProjectProvider, ProjectContext } from "./Projects";
+export {
+  ElevatedElementTier,
+  ElevationManagerContext,
+  ElevationManagerProvider,
+} from "./ElevationManager";
 
 // Types
 export type {

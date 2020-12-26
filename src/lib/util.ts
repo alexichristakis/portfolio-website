@@ -39,3 +39,5 @@ export const range = (
   y2: number,
   a: number
 ) => lerp(x2, y2, invlerp(x1, y1, a));
+
+export const peekLast = <T>(arr: T[]): T | undefined => arr[arr.length - 1];
