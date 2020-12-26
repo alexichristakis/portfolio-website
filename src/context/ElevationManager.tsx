@@ -9,29 +9,22 @@ export enum ElevatedElementTier {
 }
 
 type PartialElevatedElement = {
-  id: string;
   tier: ElevatedElementTier;
-};
-
-export type ElevatedElement = PartialElevatedElement & {
-  index: number;
+  id: string;
 };
 
 type ElevatedElementEvent = {
-  raise?: boolean;
-  id: string;
-  index: number;
+  tier: ElevatedElementTier;
+  elevations: { [key: string]: number };
 };
 
 type ElementMap = {
-  [key in ElevatedElementTier]: ElevatedElement[];
+  [key in ElevatedElementTier]: string[];
 };
 
 type ElevationManagerState = {
   elements: React.MutableRefObject<ElementMap>;
-  registerElement: (
-    el: PartialElevatedElement
-  ) => { id: string; initial: number };
+  registerElement: (el: PartialElevatedElement) => { initial: number };
   removeElement: (el: PartialElevatedElement) => void;
   raise: (el: PartialElevatedElement, amount?: number) => void;
   lower: (el: PartialElevatedElement, amount?: number) => void;
@@ -53,64 +46,54 @@ export const ElevationManagerProvider: React.FC = ({ children }) => {
 
   const { subscribe, send } = useEvents<ElevatedElementEvent>();
 
-  const registerElement = ({ id, tier }: PartialElevatedElement) => {
-    elements.current[tier].unshift({ id, tier, index: 0 });
+  const updateElements = (
+    { id, tier }: PartialElevatedElement,
+    newIndex: number
+  ) => {
+    const newElements = elements.current[tier].filter((e) => e != id);
+    newElements.splice(newIndex, 0, id);
 
-    const highest =
-      elements.current[tier][elements.current[tier].length - 1].index;
+    // update with the new location
+    elements.current = {
+      ...elements.current,
+      [tier]: newElements,
+    };
+
+    // if we breach the floor of the next tier, raise it
+    const highest = elements.current[tier].length;
     if (highest > floor.current) {
       // handle raise
       floor.current *= 2;
-      send({ raise: true, id, index: highest });
     }
 
-    console.log("register", { id, tier, highest });
-    return { initial: highest + floor.current * tier, id };
+    // generate elevations map
+    const elevations = elements.current[tier].reduce((acc, id, idx) => {
+      acc[id] = idx + floor.current * tier;
+      return acc;
+    }, {} as { [key: string]: number });
+
+    send({ tier, elevations });
+    return newIndex + floor.current * tier;
+  };
+
+  const registerElement = ({ id, tier }: PartialElevatedElement) => {
+    const initial = updateElements({ id, tier }, elements.current[tier].length);
+    return { initial };
   };
 
   const removeElement = ({ id, tier }: PartialElevatedElement) => {
-    elements.current[tier] = elements.current[tier].filter((e) => e.id !== id);
+    elements.current[tier] = elements.current[tier].filter((e) => e !== id);
   };
 
   const raise = ({ id, tier }: PartialElevatedElement, amount?: number) => {
     if (!amount) {
-      // raise to top
-      const otherElements = elements.current[tier].filter((e) => e.id !== id);
-
-      const highest = otherElements[otherElements.length - 1]?.index ?? 0;
-
-      const index = highest + 1;
-
-      elements.current[tier] = otherElements.concat({
-        id,
-        tier,
-        index,
-      });
-      let raise = false;
-
-      if (highest >= floor.current) {
-        // handle raise
-        floor.current *= 2;
-        raise = true;
-      }
-
-      send({ id, index, raise });
+      updateElements({ id, tier }, elements.current[tier].length - 1);
     }
   };
 
   const lower = ({ id, tier }: PartialElevatedElement, amount?: number) => {
     if (!amount) {
-      // lower to bottom
-      const otherElements = elements.current[tier].filter((e) => e.id !== id);
-      const lowest = otherElements[0]?.index ?? 0;
-
-      elements.current[tier] = otherElements.concat({
-        id,
-        tier,
-        index: Math.max(lowest - 1, 0),
-      });
-
-      send({ id, index: lowest });
+      updateElements({ id, tier }, 0);
     }
   };
 

@@ -41,3 +41,5 @@ export const range = (
 ) => lerp(x2, y2, invlerp(x1, y1, a));
 
 export const peekLast = <T>(arr: T[]): T | undefined => arr[arr.length - 1];
+
+export const uuid = () => btoa(Math.random().toString()).substring(0, 12);
