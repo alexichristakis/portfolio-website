@@ -9,7 +9,6 @@ export const useElevatedElement = (tier: ElevatedElementTier) => {
   const {
     registerElement,
     removeElement,
-    floor,
     subscribe,
     raise: handleRaise,
     lower: handleLower,
