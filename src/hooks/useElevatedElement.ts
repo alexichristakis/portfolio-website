@@ -1,4 +1,4 @@
-import { useCallback, useContext, useRef, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { useSpring } from "react-spring";
 // @ts-ignore
 import uuid from "uuid/v4";
@@ -28,10 +28,8 @@ export const useElevatedElement = (tier: ElevatedElementTier) => {
     const unsubscribe = subscribe((ev) => {
       if (ev.raise || ev.id === id) {
         const { index } = ev;
-        set({
-          zIndex: index + floor.current * tier,
-          immediate: true,
-        });
+
+        zIndex.set(index + floor.current * tier);
       }
     });
 

@@ -141,17 +141,22 @@ export const Window: React.FC<WindowProps> = memo(
             offsetY.set(nextOffsetY);
           }
         },
-        onMouseDown: ({ hovering }) => {
-          if (hovering) raise();
-        },
+        onMouseDown: () => raise(),
       },
       { domTarget: contentRef, eventOptions: { passive: true } }
     );
 
     useGesture(
       {
-        onPinch: ({ delta: [, d], velocities: [vd], canceled, cancel }) => {
+        onPinch: ({
+          delta: [, d],
+          velocities: [vd],
+          canceled,
+          cancel,
+          first,
+        }) => {
           if (canceled || isClosing.current || isOpening.current) return;
+          if (first) raise();
 
           const prevWidth = width.get();
           const prevHeight = height.get();

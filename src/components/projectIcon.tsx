@@ -4,11 +4,12 @@ import { useGesture } from "react-use-gesture";
 import cn from "classnames";
 
 import { setMultipleRefs, clamp, PROJECT_SIZE } from "../lib";
-import { ProjectContext } from "../context";
+import { ElevatedElementTier, ProjectContext } from "../context";
 import {
   useMeasure,
   useMountEffect,
   useProject,
+  useElevatedElement,
   useSkewAnimation,
   useWindows,
 } from "../hooks";
@@ -37,14 +38,16 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
 
   const [{ height: contentHeight }] = useMeasure(contentRef);
 
-  const [{ visible }, setVisible] = useSpring(() => ({ visible: true }));
-  const [{ xy, rz, scroll, zoom, scale }, set] = useSpring(() => ({
+  const [{ xy, rz, scroll, zoom, scale, visible }, set] = useSpring(() => ({
     xy: [0, 0],
     rz: 0,
     scroll: 0,
     zoom: 0,
     scale: INITIAL_SCALE,
+    visible: true,
   }));
+
+  const { zIndex, raise } = useElevatedElement(ElevatedElementTier.ICON);
 
   useMountEffect(() => {
     set({ zoom: initialZoom });
@@ -53,8 +56,11 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
   const { sourceRef, openWindow } = useWindows({
     window: { id, icon, backgroundColor, foregroundColor, ...rest },
     handlers: {
-      onOpen: () => setVisible({ visible: false, immediate: true }),
-      onClose: () => setVisible({ visible: true, immediate: true }),
+      onOpen: () => visible.set(false),
+      onClose: () => {
+        raise();
+        visible.set(true);
+      },
     },
   });
 
@@ -78,6 +84,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
           setIsHovered(false);
           set({ scroll: 0, scale: INITIAL_SCALE });
         } else {
+          raise();
           setIsHovered(true);
           set({
             scale: HOVER_SCALE,
@@ -166,6 +173,8 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
         pointerEvents,
         // @ts-ignore
         opacity,
+        // @ts-ignore
+        zIndex,
         "--project-background": backgroundColor,
         "--project-foreground": foregroundColor,
       }}
