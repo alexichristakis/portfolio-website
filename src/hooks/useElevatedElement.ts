@@ -20,9 +20,9 @@ export const useElevatedElement = (tier: ElevatedElementTier) => {
     const { initial } = registerElement({ id, tier });
     zIndex.set(initial);
 
-    const unsubscribe = subscribe((ev) => {
-      if (ev.tier === tier) {
-        zIndex.set(ev.elevations[id]);
+    const unsubscribe = subscribe(({ tier: updatedTier, elevations }) => {
+      if (tier === updatedTier) {
+        zIndex.set(elevations[id]);
       }
     });
 
@@ -36,6 +36,7 @@ export const useElevatedElement = (tier: ElevatedElementTier) => {
     (amount?: number) => handleRaise({ id, tier }, amount),
     [handleRaise, id, tier]
   );
+
   const lower = useCallback(
     (amount?: number) => handleLower({ id, tier }, amount),
     [handleLower, id, tier]
