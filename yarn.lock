@@ -9588,10 +9588,10 @@ react-spring@^9.0.0-rc.3:
     "@react-spring/web" "9.0.0-rc.3"
     "@react-spring/zdog" "9.0.0-rc.3"
 
-react-use-gesture@^9.0.0-beta.11:
-  version "9.0.0-beta.11"
-  resolved "https://registry.yarnpkg.com/react-use-gesture/-/react-use-gesture-9.0.0-beta.11.tgz#7849219e91d3c8a1b396c4036d40125fe6ed1d06"
-  integrity sha512-lpn39vmrDu/zB2bNx7rjaL0+Gjm17a9mzn53bX9IP4TIjMUxXlsB0IkiFj/B23F0vq1A9ozDLGHl2OaXkKJcBg==
+react-use-gesture@^9.0.0-beta.13:
+  version "9.0.0-beta.13"
+  resolved "https://registry.yarnpkg.com/react-use-gesture/-/react-use-gesture-9.0.0-beta.13.tgz#be27ff0de87db1bdbed500aeee307d9adc501e14"
+  integrity sha512-3/C6RSHb8XLuSmJHTsxOJmu5HfxmWkwT/8sjNe0qkftnD7fiv5xjosrTvWpy/OW/2B+v34hkdc76FzlJEHXTkw==
 
 react@^17.0.1:
   version "17.0.1"

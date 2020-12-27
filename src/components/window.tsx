@@ -149,22 +149,29 @@ export const Window: React.FC<WindowProps> = memo(
     useGesture(
       {
         onPinch: ({
-          delta: [, d],
+          offset: [d],
+          lastOffset: [ld],
           velocities: [vd],
           canceled,
           cancel,
+
           first,
         }) => {
-          if (canceled || isClosing.current || isOpening.current) return;
-          if (first) raise();
+          if (canceled || isClosing.current || isOpening.current) {
+            return;
+          }
+          if (first) {
+            raise();
+          }
+
+          const delta = ld - d;
 
           const prevWidth = width.get();
           const prevHeight = height.get();
 
-          const s = 1 - d / 50;
+          const s = 1 - delta / 5000;
 
           const { innerWidth, innerHeight } = window;
-
           const [maxWidth, maxHeight] = getMaxSize(innerWidth, innerHeight);
           const nextWidth = clamp(prevWidth * s, initialWidth, maxWidth);
           const nextHeight = clamp(prevHeight * s, initialHeight, maxHeight);
@@ -263,7 +270,7 @@ export const Window: React.FC<WindowProps> = memo(
       >
         <animated.img
           className={`${cn}__icon`}
-          alt={`${id} project-icon`}
+          alt={`${id} window`}
           style={{
             // @ts-ignore
             opacity: iconOpacity,

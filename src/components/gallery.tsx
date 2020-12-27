@@ -1,4 +1,3 @@
-import { animated } from "react-spring";
 import "./gallery.scss";
 
 type Image = {
@@ -10,26 +9,19 @@ export interface GalleryProps {
   images: Image[];
 }
 
-const ClassPrefix = "gallery";
+const cn = "gallery";
 
-const GalleryImage: React.FC<Image> = ({ src, caption = "" }) => {
-  return (
-    <img
-      className={`${ClassPrefix}__image`}
-      draggable={false}
-      src={src}
-      alt={caption}
-    />
-  );
-};
+const GalleryImage: React.FC<Image> = ({ src, caption = "" }) => (
+  <img className={`${cn}__image`} draggable={false} src={src} alt={caption} />
+);
 
 const Gallery: React.FC<GalleryProps> = ({ images }) => {
   return (
-    <animated.div className={ClassPrefix}>
+    <div className={cn}>
       {images.map((image, idx) => (
         <GalleryImage key={idx} {...image} />
       ))}
-    </animated.div>
+    </div>
   );
 };
 

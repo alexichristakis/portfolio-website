@@ -1,7 +1,18 @@
 .project-icon {
-  width: var(--project-size);
-  height: var(--project-size);
   will-change: transform;
+
+  &,
+  &__container,
+  &__image {
+    width: var(--project-size);
+    height: var(--project-size);
+  }
+
+  &,
+  &__container {
+    position: absolute;
+    transform-style: flat;
+  }
 
   user-select: none;
   display: flex;
@@ -9,7 +20,6 @@
   justify-content: flex-end;
   align-items: center;
   touch-action: none;
-  position: absolute;
   overflow: hidden;
   border-radius: var(--icon-border-radius);
   background: var(--near-white);
@@ -23,10 +33,5 @@
   &__content {
     position: absolute;
     top: 0;
-  }
-
-  &__image {
-    width: var(--project-size);
-    height: var(--project-size);
   }
 }
