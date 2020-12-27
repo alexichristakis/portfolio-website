@@ -32,15 +32,17 @@ export const useElevatedElement = (tier: ElevatedElementTier) => {
     };
   });
 
-  const raise = useCallback(
-    (amount?: number) => handleRaise({ id, tier }, amount),
-    [handleRaise, id, tier]
-  );
+  const raise = useCallback(() => handleRaise({ id, tier }), [
+    handleRaise,
+    id,
+    tier,
+  ]);
 
-  const lower = useCallback(
-    (amount?: number) => handleLower({ id, tier }, amount),
-    [handleLower, id, tier]
-  );
+  const lower = useCallback(() => handleLower({ id, tier }), [
+    handleLower,
+    id,
+    tier,
+  ]);
 
   return {
     zIndex,

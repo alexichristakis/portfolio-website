@@ -26,9 +26,8 @@ type ElevationManagerState = {
   elements: React.MutableRefObject<ElementMap>;
   registerElement: (el: PartialElevatedElement) => { initial: number };
   removeElement: (el: PartialElevatedElement) => void;
-  raise: (el: PartialElevatedElement, amount?: number) => void;
-  lower: (el: PartialElevatedElement, amount?: number) => void;
-  floor: React.MutableRefObject<number>;
+  raise: (el: PartialElevatedElement) => void;
+  lower: (el: PartialElevatedElement) => void;
   subscribe: Events<ElevatedElementEvent>["subscribe"];
 };
 
@@ -87,24 +86,17 @@ export const ElevationManagerProvider: React.FC = ({ children }) => {
     elements.current[tier] = elements.current[tier].filter((e) => e !== id);
   };
 
-  const raise = ({ id, tier }: PartialElevatedElement, amount?: number) => {
-    if (!amount) {
-      updateElements({ id, tier }, elements.current[tier].length - 1);
-    }
-  };
+  const raise = ({ id, tier }: PartialElevatedElement) =>
+    updateElements({ id, tier }, elements.current[tier].length - 1);
 
-  const lower = ({ id, tier }: PartialElevatedElement, amount?: number) => {
-    if (!amount) {
-      updateElements({ id, tier }, 0);
-    }
-  };
+  const lower = ({ id, tier }: PartialElevatedElement) =>
+    updateElements({ id, tier }, 0);
 
   return (
     <ElevationManagerContext.Provider
       value={{
         subscribe,
         elements,
-        floor,
         raise,
         registerElement,
         removeElement,
