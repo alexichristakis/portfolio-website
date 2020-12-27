@@ -5,6 +5,7 @@ import {
   WindowManagerProvider,
   ProjectProvider,
   CursorStateProvider,
+  ElevationManagerProvider,
 } from "./context";
 import { ProjectIcons, Cursor } from "./components";
 import { PROJECT_SIZE, ICON_BORDER_RADIUS } from "./lib";
@@ -19,21 +20,23 @@ const App: React.FC = () => {
   return (
     <CursorStateProvider>
       <ProjectProvider>
-        <div
-          ref={ref}
-          className="app-container"
-          style={{
-            ...({
-              "--project-size": `${PROJECT_SIZE}px`,
-              "--icon-border-radius": `${ICON_BORDER_RADIUS}px`,
-            } as CSSProperties),
-          }}
-        >
-          <WindowManagerProvider>
-            <ProjectIcons />
-          </WindowManagerProvider>
-        </div>
-        <Cursor />
+        <ElevationManagerProvider>
+          <div
+            ref={ref}
+            className="app-container"
+            style={{
+              ...({
+                "--project-size": `${PROJECT_SIZE}px`,
+                "--icon-border-radius": `${ICON_BORDER_RADIUS}px`,
+              } as CSSProperties),
+            }}
+          >
+            <WindowManagerProvider>
+              <ProjectIcons />
+            </WindowManagerProvider>
+          </div>
+          <Cursor />
+        </ElevationManagerProvider>
       </ProjectProvider>
     </CursorStateProvider>
   );

@@ -3,8 +3,13 @@ import { animated, useSpring, to } from "react-spring";
 import { useGesture } from "react-use-gesture";
 
 import { SVG } from "../assets/icons";
-import { useSkewAnimation, useMeasure, useMountEffect } from "../hooks";
-import { WindowConfig } from "../context";
+import {
+  useSkewAnimation,
+  useElevatedElement,
+  useMeasure,
+  useMountEffect,
+} from "../hooks";
+import { WindowConfig, ElevatedElementTier } from "../context";
 import { clamp, PROJECT_SIZE } from "../lib";
 import "./window.scss";
 
@@ -95,6 +100,10 @@ export const Window: React.FC<WindowProps> = memo(
       }).then(() => (isOpening.current = false));
     });
 
+    const { zIndex, raise, lower } = useElevatedElement(
+      ElevatedElementTier.WINDOW
+    );
+
     const { resetRotation, rotation, onMove, onHover } = useSkewAnimation({
       ref: windowRef,
       throttle: 7,
@@ -132,22 +141,37 @@ export const Window: React.FC<WindowProps> = memo(
             offsetY.set(nextOffsetY);
           }
         },
+        onMouseDown: () => raise(),
       },
       { domTarget: contentRef, eventOptions: { passive: true } }
     );
 
     useGesture(
       {
-        onPinch: ({ delta: [, d], velocities: [vd], canceled, cancel }) => {
-          if (canceled || isClosing.current || isOpening.current) return;
+        onPinch: ({
+          offset: [d],
+          lastOffset: [ld],
+          velocities: [vd],
+          canceled,
+          cancel,
+
+          first,
+        }) => {
+          if (canceled || isClosing.current || isOpening.current) {
+            return;
+          }
+          if (first) {
+            raise();
+          }
+
+          const delta = ld - d;
 
           const prevWidth = width.get();
           const prevHeight = height.get();
 
-          const s = 1 - d / 50;
+          const s = 1 - delta / 5000;
 
           const { innerWidth, innerHeight } = window;
-
           const [maxWidth, maxHeight] = getMaxSize(innerWidth, innerHeight);
           const nextWidth = clamp(prevWidth * s, initialWidth, maxWidth);
           const nextHeight = clamp(prevHeight * s, initialHeight, maxHeight);
@@ -188,7 +212,7 @@ export const Window: React.FC<WindowProps> = memo(
 
       // stop width and height to get proper measurements below.
       stop(["width", "height"]);
-
+      lower();
       onRequestClose();
       resetRotation();
       requestAnimationFrame(() => {
@@ -241,11 +265,12 @@ export const Window: React.FC<WindowProps> = memo(
       <animated.div
         ref={windowRef}
         className={`${cn}__container`}
-        style={{ width, height, transform: translate }}
+        // @ts-ignore
+        style={{ width, height, transform: translate, zIndex }}
       >
         <animated.img
           className={`${cn}__icon`}
-          alt={`${id} project-icon`}
+          alt={`${id} window`}
           style={{
             // @ts-ignore
             opacity: iconOpacity,

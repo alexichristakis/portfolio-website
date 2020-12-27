@@ -1,14 +1,15 @@
 import { useState, useRef, useContext } from "react";
 import { animated, to, useSpring } from "react-spring";
 import { useGesture } from "react-use-gesture";
-import cn from "classnames";
+import classNames from "classnames";
 
 import { setMultipleRefs, clamp, PROJECT_SIZE } from "../lib";
-import { ProjectContext } from "../context";
+import { ElevatedElementTier, ProjectContext } from "../context";
 import {
   useMeasure,
   useMountEffect,
   useProject,
+  useElevatedElement,
   useSkewAnimation,
   useWindows,
 } from "../hooks";
@@ -37,14 +38,15 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
 
   const [{ height: contentHeight }] = useMeasure(contentRef);
 
-  const [{ visible }, setVisible] = useSpring(() => ({ visible: true }));
-  const [{ xy, rz, scroll, zoom, scale }, set] = useSpring(() => ({
+  const [{ xy, scroll, zoom, scale, visible }, set] = useSpring(() => ({
     xy: [0, 0],
-    rz: 0,
     scroll: 0,
     zoom: 0,
     scale: INITIAL_SCALE,
+    visible: true,
   }));
+
+  const { zIndex, raise } = useElevatedElement(ElevatedElementTier.ICON);
 
   useMountEffect(() => {
     set({ zoom: initialZoom });
@@ -53,8 +55,13 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
   const { sourceRef, openWindow } = useWindows({
     window: { id, icon, backgroundColor, foregroundColor, ...rest },
     handlers: {
-      onOpen: () => setVisible({ visible: false, immediate: true }),
-      onClose: () => setVisible({ visible: true, immediate: true }),
+      onOpen: () => {
+        visible.set(false);
+      },
+      onClose: () => {
+        raise();
+        visible.set(true);
+      },
     },
   });
 
@@ -78,10 +85,9 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
           setIsHovered(false);
           set({ scroll: 0, scale: INITIAL_SCALE });
         } else {
+          raise();
           setIsHovered(true);
-          set({
-            scale: HOVER_SCALE,
-          });
+          set({ scale: HOVER_SCALE });
         }
 
         onHover({ active, ...rest });
@@ -116,17 +122,18 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
 
   useGesture(
     {
-      onPinch: ({ offset: [, rz], delta: [, d], cancel, canceled }) => {
+      onPinch: ({ offset: [d], lastOffset: [ld], cancel, canceled }) => {
         if (canceled) return;
+        const delta = ld - d;
 
         const prevZoom = zoom.get();
-        const nextZoom = clamp(prevZoom - d / 50, -0.5, 0.25);
+        const nextZoom = clamp(prevZoom - delta / 1000, -0.5, 0.25);
 
         if (nextZoom === 0.25) {
           openWindow();
           cancel();
         } else {
-          set({ zoom: nextZoom, rz, immediate: true });
+          set({ zoom: nextZoom, immediate: true });
         }
       },
       onWheel: ({ pinching, delta: [, dy] }) => {
@@ -147,47 +154,50 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
     [
       position.to((x, y) => `translate(${x}px, ${y}px)`),
       to([zoom, scale], (z, s) => `scale(${z + s})`),
-      to([rotation, rz], (rxy, rz) => `${rxy} rotateZ(${rz}deg)`),
     ],
-    (t, s, r) => `${t} ${s} ${r}`
+    (t, s) => `${t} ${s}`
   );
 
   const pointerEvents = visible.to((visible) => (visible ? "all" : "none"));
   const opacity = visible.to((visible) => (visible ? 1 : 0));
 
-  const ClassPrefix = "project-icon";
+  const cn = "project-icon";
   return (
     <animated.div
-      ref={setMultipleRefs(sourceRef, containerRef)}
-      className={cn(ClassPrefix, isHovered && `${ClassPrefix}__shadow`)}
-      onClick={handleOnClick}
-      style={{
-        transform: containerTransform,
-        pointerEvents,
-        // @ts-ignore
-        opacity,
-        "--project-background": backgroundColor,
-        "--project-foreground": foregroundColor,
-      }}
+      className={`${cn}__container`}
+      // @ts-ignore
+      style={{ transform: containerTransform, opacity, pointerEvents, zIndex }}
     >
       <animated.div
-        className={`${ClassPrefix}__content`}
-        ref={contentRef}
-        style={{ transform: contentTransform }}
+        ref={setMultipleRefs(sourceRef, containerRef)}
+        className={classNames(cn, isHovered && `${cn}__shadow`)}
+        onClick={handleOnClick}
+        style={{
+          transform: rotation,
+          // @ts-ignore
+          "--project-background": backgroundColor,
+          "--project-foreground": foregroundColor,
+        }}
       >
-        <img
-          className={`${ClassPrefix}__image`}
-          draggable={false}
-          alt={`${id} icon`}
-          src={icon}
+        <animated.div
+          className={`${cn}__content`}
+          ref={contentRef}
+          style={{ transform: contentTransform }}
+        >
+          <img
+            className={`${cn}__image`}
+            draggable={false}
+            alt={`${id} icon`}
+            src={icon}
+          />
+          {iconContent}
+        </animated.div>
+        <ScrollBar
+          offset={scroll}
+          contentHeight={contentHeight - PROJECT_SIZE}
+          visible={isHovered}
         />
-        {iconContent}
       </animated.div>
-      <ScrollBar
-        offset={scroll}
-        contentHeight={contentHeight - PROJECT_SIZE}
-        visible={isHovered}
-      />
     </animated.div>
   );
 };

@@ -1,7 +1,8 @@
 // import { useRef } from "react";
 import { useSpring, animated } from "react-spring";
 
-import { useCursorEvents } from "../hooks";
+import { ElevatedElementTier } from "../context";
+import { useCursorEvents, useElevatedElement } from "../hooks";
 import "./cursor.scss";
 
 const CURSOR_SIZE = 10;
@@ -40,6 +41,8 @@ export const Cursor: React.FC = () => {
   // const offsetY = useMotionValue(0);
   // const width = useMotionValue(CURSOR_SIZE);
   // const height = useMotionValue(CURSOR_SIZE);
+
+  const { zIndex } = useElevatedElement(ElevatedElementTier.CURSOR);
 
   const { position } = useCursorEvents({
     // onLock: ({ target }) => {
@@ -111,7 +114,8 @@ export const Cursor: React.FC = () => {
   return (
     <animated.div
       className={`${ClassPrefix}__container`}
-      style={{ transform: position.to(transform), ...cursorStyle }}
+      // @ts-ignore
+      style={{ zIndex, transform: position.to(transform), ...cursorStyle }}
     >
       <animated.div
         style={{

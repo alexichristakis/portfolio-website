@@ -39,3 +39,5 @@ export const range = (
   y2: number,
   a: number
 ) => lerp(x2, y2, invlerp(x1, y1, a));
+
+export const uuid = () => btoa(Math.random().toString()).substring(0, 12);
