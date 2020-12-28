@@ -10,6 +10,7 @@ export { useSkewAnimation } from "./useSkewAnimation";
 export { useMeasure } from "./useMeasure";
 export { useProject } from "./useProject";
 export { useMountEffect } from "./useMountEffect";
+export { useLayoutMountEffect } from "./useMountEffect";
 export { useElevatedElement } from "./useElevatedElement";
 
 // type exports

@@ -32,7 +32,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
   const isDragSession = useRef(false);
 
   const [
-    { icon, iconContent, backgroundColor, foregroundColor, ...rest },
+    { icon, iconContent, backgroundColor, foregroundColor },
     [initialX, initialY, initialZoom],
   ] = useProject(id);
 
@@ -53,7 +53,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
   });
 
   const { sourceRef, openWindow } = useWindows({
-    window: { id, icon, backgroundColor, foregroundColor, ...rest },
+    id,
     handlers: {
       onOpen: () => {
         visible.set(false);

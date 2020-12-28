@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import { animated, SpringValue, useSpring } from "react-spring";
 
 import { useMeasure } from "../hooks";
@@ -13,33 +13,31 @@ export interface ScrollBarProps {
 const BAR_HEIGHT = 25;
 
 const ClassPrefix = "scrollbar";
-const ScrollBar: React.FC<ScrollBarProps> = ({
-  offset,
-  contentHeight,
-  visible = true,
-}) => {
-  const ref = useRef<HTMLDivElement>(null);
+const ScrollBar: React.FC<ScrollBarProps> = memo(
+  ({ offset, contentHeight, visible = true }) => {
+    const ref = useRef<HTMLDivElement>(null);
 
-  const { opacity } = useSpring({ opacity: visible ? 1 : 0 });
-  const [{ height }] = useMeasure(ref);
+    const { opacity } = useSpring({ opacity: visible ? 1 : 0 });
+    const [{ height }] = useMeasure(ref);
 
-  const scroll = offset
-    .to({
-      range: [-contentHeight, 0],
-      output: [height - BAR_HEIGHT, 0],
-      extrapolate: "clamp",
-    })
-    .to((val) => `translateY(${val}px)`);
+    const scroll = offset
+      .to({
+        range: [-contentHeight, 0],
+        output: [height - BAR_HEIGHT, 0],
+        extrapolate: "clamp",
+      })
+      .to((val) => `translateY(${val}px)`);
 
-  return (
-    // @ts-ignore
-    <animated.div ref={ref} className={ClassPrefix} style={{ opacity }}>
-      <animated.div
-        className={`${ClassPrefix}__bar`}
-        style={{ transform: scroll, height: BAR_HEIGHT }}
-      />
-    </animated.div>
-  );
-};
+    return (
+      // @ts-ignore
+      <animated.div ref={ref} className={ClassPrefix} style={{ opacity }}>
+        <animated.div
+          className={`${ClassPrefix}__bar`}
+          style={{ transform: scroll, height: BAR_HEIGHT }}
+        />
+      </animated.div>
+    );
+  }
+);
 
 export default ScrollBar;

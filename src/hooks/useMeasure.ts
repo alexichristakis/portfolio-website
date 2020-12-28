@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { INITIAL_RECT } from "../lib";
 import { Rect } from "../types";
-import { useMountEffect } from "./useMountEffect";
+import { useLayoutMountEffect } from "./useMountEffect";
 
 type UseMeasureReturn = [Rect, () => Rect];
 
@@ -12,7 +12,7 @@ export const useMeasure = (
 ): UseMeasureReturn => {
   const [rect, setRect] = useState<Rect>(INITIAL_RECT);
 
-  useMountEffect(() => {
+  useLayoutMountEffect(() => {
     measure();
   });
 

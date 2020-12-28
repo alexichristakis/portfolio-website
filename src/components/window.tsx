@@ -8,6 +8,7 @@ import {
   useElevatedElement,
   useMeasure,
   useMountEffect,
+  useProject,
 } from "../hooks";
 import { WindowConfig, ElevatedElementTier } from "../context";
 import { clamp, PROJECT_SIZE } from "../lib";
@@ -38,17 +39,11 @@ const getNextOffset = (
 
 const cn = "window";
 export const Window: React.FC<WindowProps> = memo(
-  ({
-    id,
-    onRequestClose,
-    destroyWindow,
-    sourceRef,
-    content,
-    aspectRatio,
-    icon,
-    backgroundColor,
-    foregroundColor,
-  }) => {
+  ({ id, sourceRef, onRequestClose, destroyWindow }) => {
+    const [
+      { content, aspectRatio, icon, backgroundColor, foregroundColor },
+    ] = useProject(id);
+
     const contentRef = useRef<HTMLDivElement>(null);
     const windowRef = useRef<HTMLDivElement>(null);
     const isClosing = useRef(false);

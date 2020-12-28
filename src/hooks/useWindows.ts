@@ -1,7 +1,6 @@
 import { useContext, useRef } from "react";
 
 import {
-  WindowConfig,
   WindowEventHandlers,
   WindowManagerContext,
   WindowState,
@@ -9,23 +8,21 @@ import {
 import { useMountEffect } from "./useMountEffect";
 
 export type UseWindowConfig = {
-  window: Omit<WindowConfig, "sourceRef">;
+  id: string;
   handlers?: WindowEventHandlers;
 };
 
-export const useWindows = ({ window, handlers }: UseWindowConfig) => {
+export const useWindows = ({ id, handlers }: UseWindowConfig) => {
   const sourceRef = useRef<HTMLDivElement>(null);
   const { openWindow, registerWindow, subscribe } = useContext(
     WindowManagerContext
   );
 
   useMountEffect(() => {
-    registerWindow({ ...window, sourceRef });
-
+    registerWindow({ id, sourceRef });
     const unsubscribe = subscribe((payload) => {
-      const { type, id } = payload;
-
-      if (id === window.id) {
+      const { type, id: windowId } = payload;
+      if (id === windowId) {
         if (type === WindowState.OPEN) {
           handlers?.onOpen?.();
         }
@@ -42,7 +39,7 @@ export const useWindows = ({ window, handlers }: UseWindowConfig) => {
   });
 
   return {
-    openWindow: () => openWindow(window.id),
+    openWindow: () => openWindow(id),
     sourceRef,
   };
 };
