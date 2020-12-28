@@ -6,17 +6,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: '10.x'
+          node-version: "10.x"
       - name: Build
         run: |
           yarn
           yarn build
       - name: Upload build artifact
-        uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@master
         with:
           name: build
           path: build/
@@ -25,8 +24,7 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Download build
-        uses: actions/download-artifact@master
+      - uses: actions/download-artifact@master
         with:
           name: build
           path: build/
