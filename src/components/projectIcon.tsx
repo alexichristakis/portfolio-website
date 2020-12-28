@@ -122,12 +122,11 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
 
   useGesture(
     {
-      onPinch: ({ offset: [d], lastOffset: [ld], cancel, canceled }) => {
+      onPinch: ({ velocities: [vd], cancel, canceled }) => {
         if (canceled) return;
-        const delta = ld - d;
 
         const prevZoom = zoom.get();
-        const nextZoom = clamp(prevZoom - delta / 1000, -0.5, 0.25);
+        const nextZoom = clamp(prevZoom + vd / 10, -0.5, 0.25);
 
         if (nextZoom === 0.25) {
           openWindow();
