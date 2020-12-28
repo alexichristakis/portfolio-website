@@ -12,6 +12,10 @@ jobs:
         with:
           node-version: '10.x'
       - name: Build
+        uses: actions/upload-artifact@master
+        with:
+          name: build
+          path: build/
         run: |
           yarn
           yarn build
@@ -27,3 +31,7 @@ jobs:
           BRANCH: gh-pages
           FOLDER: build
           CLEAN: true
+        uses: actions/download-artifact@master
+        with:
+          name: build
+          path: build/
