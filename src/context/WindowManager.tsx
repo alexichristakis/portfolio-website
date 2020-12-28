@@ -55,15 +55,18 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
     sourceRefs.current[id] = sourceRef;
   }, []);
 
-  const openWindow = useCallback((id: string) => {
-    if (sourceRefs.current[id]) {
-      windowManagerRef.current?.open({
-        id,
-        sourceRef: sourceRefs.current[id],
-      });
-      send({ type: WindowState.OPEN, id: id });
-    }
-  }, []);
+  const openWindow = useCallback(
+    (id: string) => {
+      if (sourceRefs.current[id]) {
+        windowManagerRef.current?.open({
+          id,
+          sourceRef: sourceRefs.current[id],
+        });
+        send({ type: WindowState.OPEN, id: id });
+      }
+    },
+    [send]
+  );
 
   const requestClose = (id: string) => send({ type: WindowState.CLOSING, id });
   const destroy = (id: string) => send({ type: WindowState.CLOSED, id });
