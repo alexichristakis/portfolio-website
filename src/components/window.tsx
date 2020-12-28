@@ -148,15 +148,7 @@ export const Window: React.FC<WindowProps> = memo(
 
     useGesture(
       {
-        onPinch: ({
-          offset: [d],
-          lastOffset: [ld],
-          velocities: [vd],
-          canceled,
-          cancel,
-
-          first,
-        }) => {
+        onPinch: ({ velocities: [vd], canceled, cancel, first }) => {
           if (canceled || isClosing.current || isOpening.current) {
             return;
           }
@@ -164,12 +156,10 @@ export const Window: React.FC<WindowProps> = memo(
             raise();
           }
 
-          const delta = ld - d;
-
           const prevWidth = width.get();
           const prevHeight = height.get();
 
-          const s = 1 - delta / 5000;
+          const s = 1 + vd / 10;
 
           const { innerWidth, innerHeight } = window;
           const [maxWidth, maxHeight] = getMaxSize(innerWidth, innerHeight);
