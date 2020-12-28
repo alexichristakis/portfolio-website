@@ -1,10 +1,17 @@
-import { createContext, useCallback, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { Project as ProjectType } from "../types";
 import { useEvents, Events } from "../hooks";
 import { Window } from "../components";
 
-export type WindowConfig = ProjectType & {
+export type WindowConfig = {
   id: string;
   sourceRef: React.RefObject<HTMLElement>;
 };
@@ -18,7 +25,6 @@ export type WindowEventHandlers = {
 type WindowManagerState = {
   registerWindow: (window: WindowConfig) => void;
   openWindow: (id: string) => void;
-  closeWindow: (id: string) => void;
   subscribe: Events<WindowEvent>["subscribe"];
 };
 
@@ -34,93 +40,95 @@ type WindowEvent = {
 };
 
 type WindowMap = {
-  [id: string]: WindowConfig & { state: WindowState };
+  [id: string]: React.RefObject<HTMLElement>;
 };
 
 export const WindowManagerContext = createContext({} as WindowManagerState);
 
 export const WindowManagerProvider: React.FC = ({ children }) => {
-  const registeredWindows = useRef<WindowMap>({});
-  const [openWindows, setOpenWindows] = useState<string[]>([]);
+  const sourceRefs = useRef<WindowMap>({});
+  const windowManagerRef = useRef<WindowManagerRef>(null);
 
   const { send, subscribe } = useEvents<WindowEvent>();
 
-  const registerWindow = useCallback((window: WindowConfig) => {
-    if (!registeredWindows.current[window.id]) {
-      registeredWindows.current[window.id] = {
-        ...window,
-        state: WindowState.CLOSED,
-      };
+  const registerWindow = useCallback(({ id, sourceRef }: WindowConfig) => {
+    sourceRefs.current[id] = sourceRef;
+  }, []);
+
+  const openWindow = useCallback((id: string) => {
+    if (sourceRefs.current[id]) {
+      windowManagerRef.current?.open({
+        id,
+        sourceRef: sourceRefs.current[id],
+      });
+      send({ type: WindowState.OPEN, id: id });
     }
   }, []);
 
-  const handleWindowOpen = useCallback(
-    (id: string) => {
-      send({ type: WindowState.OPEN, id });
-      registeredWindows.current[id].state = WindowState.OPEN;
-      requestAnimationFrame(() => {
-        setOpenWindows((prev) => [...prev, id]);
-      });
-    },
-    [send]
-  );
-
-  const openWindow = useCallback(
-    (id: string) => {
-      const window = registeredWindows.current[id];
-      if (window) {
-        const { state } = window;
-        if (state !== WindowState.OPEN) {
-          handleWindowOpen(id);
-        }
-      }
-    },
-    [handleWindowOpen]
-  );
-
-  const requestClose = useCallback(
-    (id: string) => {
-      send({ type: WindowState.CLOSING, id });
-      registeredWindows.current[id].state = WindowState.CLOSING;
-    },
-    [send]
-  );
-
-  const closeWindow = useCallback(
-    (id: string) => {
-      send({ type: WindowState.CLOSED, id });
-      registeredWindows.current[id].state = WindowState.CLOSED;
-      requestAnimationFrame(() => {
-        setOpenWindows((prev) => prev.filter((window) => window !== id));
-      });
-    },
-    [send]
-  );
+  const requestClose = (id: string) => send({ type: WindowState.CLOSING, id });
+  const destroy = (id: string) => send({ type: WindowState.CLOSED, id });
 
   const state = useMemo(
     () => ({
       subscribe,
       openWindow,
-      closeWindow,
       registerWindow,
     }),
-    [subscribe, openWindow, closeWindow, registerWindow]
+    [subscribe, openWindow, registerWindow]
   );
 
   return (
     <WindowManagerContext.Provider value={state}>
       {children}
-      <div className="absolute-fill pointer-none">
-        {openWindows.map((id) => (
-          <Window
-            key={id}
-            onRequestClose={() => requestClose(id)}
-            destroyWindow={() => closeWindow(id)}
-            // topWindow={topWindow}
-            {...registeredWindows.current[id]}
-          />
-        ))}
-      </div>
+      <WindowManager
+        ref={windowManagerRef}
+        onRequestClose={requestClose}
+        onDestroy={destroy}
+      />
     </WindowManagerContext.Provider>
   );
 };
+
+interface WindowManagerProps {
+  onRequestClose: (id: string) => void;
+  onDestroy: (id: string) => void;
+}
+
+type WindowManagerRef = {
+  open: (config: WindowConfig) => void;
+};
+
+const WindowManager = forwardRef<WindowManagerRef, WindowManagerProps>(
+  ({ onRequestClose, onDestroy }, ref) => {
+    const [openWindows, setOpenWindows] = useState<WindowConfig[]>([]);
+
+    useImperativeHandle(ref, () => ({
+      open: (w) => {
+        requestAnimationFrame(() => {
+          setOpenWindows((prev) => [...prev, w]);
+        });
+      },
+    }));
+
+    const handleOnDestroy = (id: string) => {
+      onDestroy(id);
+      requestAnimationFrame(() => {
+        setOpenWindows((prev) => prev.filter((w) => w.id !== id));
+      });
+    };
+
+    return (
+      <div className="absolute-fill pointer-none">
+        {openWindows.map(({ id, sourceRef }) => (
+          <Window
+            key={id}
+            id={id}
+            sourceRef={sourceRef}
+            onRequestClose={() => onRequestClose(id)}
+            destroyWindow={() => handleOnDestroy(id)}
+          />
+        ))}
+      </div>
+    );
+  }
+);

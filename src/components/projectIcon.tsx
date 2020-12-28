@@ -53,7 +53,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
   });
 
   const { sourceRef, openWindow } = useWindows({
-    window: { id, icon, backgroundColor, foregroundColor, ...rest },
+    id,
     handlers: {
       onOpen: () => {
         visible.set(false);
