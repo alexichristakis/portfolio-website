@@ -1,14 +1,14 @@
 import paintParty from "./paint_party.png";
-import unexpected from "./unexpected.png";
-import herd from "./herd.png";
-import evently from "./evently.png";
-import sesh from "./sesh.png";
+import unexpected from "./unexpected.jpg";
+import herd from "./herd.jpg";
+import evently from "./evently.jpg";
+import sesh from "./sesh.jpg";
 import resume from "./resume.png";
-import screentime from "./screentime.png";
-import accordion from "./accordion.png";
+import screentime from "./screentime.jpg";
+import accordion from "./accordion.jpg";
 import twitterlytics from "./twitterlytics.png";
-import website from "./website.png";
-import photography from "./photography.png";
+import website from "./website.jpg";
+import photography from "./photography.jpg";
 
 const Icons = {
   paintParty,

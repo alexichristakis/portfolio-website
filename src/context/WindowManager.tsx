@@ -43,6 +43,15 @@ type WindowMap = {
   [id: string]: React.RefObject<HTMLElement>;
 };
 
+interface WindowManagerProps {
+  onRequestClose: (id: string) => void;
+  onDestroy: (id: string) => void;
+}
+
+type WindowManagerRef = {
+  open: (config: WindowConfig, cb?: () => void) => void;
+};
+
 export const WindowManagerContext = createContext({} as WindowManagerState);
 
 export const WindowManagerProvider: React.FC = ({ children }) => {
@@ -58,11 +67,12 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
   const openWindow = useCallback(
     (id: string) => {
       if (sourceRefs.current[id]) {
-        windowManagerRef.current?.open({
-          id,
-          sourceRef: sourceRefs.current[id],
-        });
-        send({ type: WindowState.OPEN, id: id });
+        const config = { id, sourceRef: sourceRefs.current[id] };
+        windowManagerRef.current?.open(config, () =>
+          requestAnimationFrame(() => {
+            send({ type: WindowState.OPEN, id: id });
+          })
+        );
       }
     },
     [send]
@@ -92,24 +102,16 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
   );
 };
 
-interface WindowManagerProps {
-  onRequestClose: (id: string) => void;
-  onDestroy: (id: string) => void;
-}
-
-type WindowManagerRef = {
-  open: (config: WindowConfig) => void;
-};
-
 const WindowManager = forwardRef<WindowManagerRef, WindowManagerProps>(
   ({ onRequestClose, onDestroy }, ref) => {
     const [openWindows, setOpenWindows] = useState<WindowConfig[]>([]);
 
     useImperativeHandle(ref, () => ({
-      open: (w) => {
-        requestAnimationFrame(() => {
+      open: (w, cb) => {
+        if (!openWindows.find(({ id }) => id === w.id)) {
           setOpenWindows((prev) => [...prev, w]);
-        });
+          cb?.();
+        }
       },
     }));
 

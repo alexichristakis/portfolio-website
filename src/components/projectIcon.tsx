@@ -77,6 +77,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
     ref: containerRef,
   });
 
+  const minScroll = -contentHeight + PROJECT_SIZE;
   useGesture(
     {
       onMove,
@@ -87,7 +88,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
         } else {
           raise();
           setIsHovered(true);
-          set({ scale: HOVER_SCALE });
+          set({ scroll: minScroll, scale: HOVER_SCALE });
         }
 
         onHover({ active, ...rest });
@@ -105,12 +106,13 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
       },
       onMouseDown: () => {
         set({ scale: CLICK_SCALE });
+        isDragSession.current = false;
       },
-      onMouseUp: () => {
+      onMouseUp: ({ dragging }) => {
         set({ scale: HOVER_SCALE });
-        setTimeout(() => {
-          isDragSession.current = false;
-        }, 1);
+        if (!dragging) {
+          handleOnClick();
+        }
       },
     },
     {
@@ -137,11 +139,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
       },
       onWheel: ({ pinching, delta: [, dy] }) => {
         if (isHovered && !pinching) {
-          const next = Math.min(
-            Math.max(scroll.get() - dy * 5, -contentHeight + PROJECT_SIZE),
-            0
-          );
-          set({ scroll: next });
+          set({ scroll: clamp(scroll.get() - dy * 5, minScroll, 0) });
         }
       },
     },
@@ -170,7 +168,6 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
       <animated.div
         ref={setMultipleRefs(sourceRef, containerRef)}
         className={classNames(cn, isHovered && `${cn}__shadow`)}
-        onClick={handleOnClick}
         style={{
           transform: rotation,
           // @ts-ignore

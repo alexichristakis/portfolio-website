@@ -12,7 +12,7 @@ export type UseWindowConfig = {
   handlers?: WindowEventHandlers;
 };
 
-export const useWindows = ({ id, handlers }: UseWindowConfig) => {
+export const useWindows = ({ id, handlers = {} }: UseWindowConfig) => {
   const sourceRef = useRef<HTMLDivElement>(null);
   const { openWindow, registerWindow, subscribe } = useContext(
     WindowManagerContext
@@ -20,17 +20,20 @@ export const useWindows = ({ id, handlers }: UseWindowConfig) => {
 
   useMountEffect(() => {
     registerWindow({ id, sourceRef });
+
+    const { onOpen, onRequestClose, onClose } = handlers;
     const unsubscribe = subscribe((payload) => {
       const { type, id: windowId } = payload;
       if (id === windowId) {
-        if (type === WindowState.OPEN) {
-          handlers?.onOpen?.();
-        }
-        if (type === WindowState.CLOSING) {
-          handlers?.onRequestClose?.();
-        }
-        if (type === WindowState.CLOSED) {
-          handlers?.onClose?.();
+        switch (type) {
+          case WindowState.OPEN:
+            return onOpen?.();
+          case WindowState.CLOSING:
+            return onRequestClose?.();
+          case WindowState.CLOSED:
+            return onClose?.();
+          default:
+            break;
         }
       }
     });
