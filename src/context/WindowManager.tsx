@@ -67,11 +67,9 @@ export const WindowManagerProvider: React.FC = ({ children }) => {
   const openWindow = useCallback(
     (id: string) => {
       if (sourceRefs.current[id]) {
-        const config = { id, sourceRef: sourceRefs.current[id] };
-        windowManagerRef.current?.open(config, () =>
-          requestAnimationFrame(() => {
-            send({ type: WindowState.OPEN, id: id });
-          })
+        windowManagerRef.current?.open(
+          { id, sourceRef: sourceRefs.current[id] },
+          () => send({ type: WindowState.OPEN, id: id })
         );
       }
     },
@@ -110,7 +108,7 @@ const WindowManager = forwardRef<WindowManagerRef, WindowManagerProps>(
       open: (w, cb) => {
         if (!openWindows.find(({ id }) => id === w.id)) {
           setOpenWindows((prev) => [...prev, w]);
-          cb?.();
+          requestAnimationFrame(() => cb?.());
         }
       },
     }));

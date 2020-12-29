@@ -6,24 +6,49 @@ import { useLayoutMountEffect } from "./useMountEffect";
 
 type UseMeasureReturn = [Rect, () => Rect];
 
+type Config = {
+  forceRender?: boolean;
+  ignoreTransform?: boolean;
+};
+
 export const useMeasure = (
   ref: React.RefObject<HTMLElement>,
-  forceRender: boolean = true
+  config: Config = {}
 ): UseMeasureReturn => {
   const [rect, setRect] = useState<Rect>(INITIAL_RECT);
+
+  const { forceRender = true, ignoreTransform = false } = config;
 
   useLayoutMountEffect(() => {
     measure();
   });
 
-  const measure = () => {
-    const newRect = ref.current?.getBoundingClientRect();
-    if (newRect) {
-      const { x, y, width, height } = newRect;
-      if (forceRender) setRect({ x, y, width, height });
+  const getRect = (): Rect => {
+    const node = ref.current;
+    if (ignoreTransform && node) {
+      const { offsetHeight, offsetWidth, offsetLeft, offsetTop } = node;
+      return {
+        height: offsetHeight,
+        width: offsetWidth,
+        x: offsetLeft,
+        y: offsetTop,
+      };
     }
 
-    return newRect ?? rect;
+    const domRect = node?.getBoundingClientRect();
+    if (domRect) {
+      const { x, y, width, height } = domRect;
+      return { x, y, width, height };
+    }
+
+    return rect;
+  };
+
+  const measure = () => {
+    const newRect = getRect();
+    if (forceRender) setRect(newRect);
+
+    return newRect;
   };
 
   return [rect, measure];
