@@ -10,7 +10,7 @@ export interface ScrollBarProps {
   visible?: boolean;
 }
 
-const BAR_HEIGHT = 25;
+const BAR_HEIGHT = 50;
 
 const ClassPrefix = "scrollbar";
 const ScrollBar: React.FC<ScrollBarProps> = memo(
@@ -18,7 +18,7 @@ const ScrollBar: React.FC<ScrollBarProps> = memo(
     const ref = useRef<HTMLDivElement>(null);
 
     const { opacity } = useSpring({ opacity: visible ? 1 : 0 });
-    const [{ height }] = useMeasure(ref);
+    const [{ height }] = useMeasure(ref, { ignoreTransform: true });
 
     const scroll = offset
       .to({
