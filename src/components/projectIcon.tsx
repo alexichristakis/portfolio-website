@@ -108,8 +108,8 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id, index }) => {
         set({ scale: HOVER_SCALE });
         if (!isDragSession.current) {
           openWindow();
-          isDragSession.current = false;
         }
+        isDragSession.current = false;
       },
     },
     {

@@ -1,0 +1,64 @@
+.project {
+  &__icon {
+    width: var(--project-size);
+    height: var(--project-size);
+
+    user-select: none;
+    touch-action: none;
+    overflow: hidden;
+    border-radius: var(--icon-border-radius);
+    background: var(--near-white);
+
+    box-shadow: var(--large-shadow);
+    &__shadow {
+      box-shadow: var(--super-shadow);
+    }
+
+    &-content {
+      //   position: absolute;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+
+      img {
+        width: var(--project-size);
+        height: var(--project-size);
+      }
+    }
+  }
+
+  &__window {
+    position: absolute;
+    $border-radius: 20px;
+    border-radius: $border-radius;
+    pointer-events: all;
+    user-select: none;
+    overflow-y: scroll;
+    top: 0;
+
+    transform-origin: top left;
+    &-content {
+    }
+
+    &-close {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--light-gray);
+      color: var(--near-white);
+      padding: 5px;
+      border-radius: 15px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &,
+  &__container {
+    position: absolute;
+    transform-style: flat;
+  }
+
+  transition: box-shadow 0.5s;
+}
