@@ -1,16 +1,14 @@
 import { memo, useRef } from "react";
-import { animated, useSpring, to } from "react-spring";
+import { animated, to, useSpring } from "react-spring";
 import { useGesture } from "react-use-gesture";
-
 import { SVG } from "../assets/icons";
+import { ElevatedElementTier, WindowConfig } from "../context";
 import {
-  useSkewAnimation,
   useElevatedElement,
   useMeasure,
   useMountEffect,
-  useProject,
+  useProject, useSkewAnimation
 } from "../hooks";
-import { WindowConfig, ElevatedElementTier } from "../context";
 import { clamp, PROJECT_SIZE } from "../lib";
 import "./window.scss";
 
@@ -73,8 +71,7 @@ export const Window: React.FC<WindowProps> = memo(
     const initialRect = measureSourceRect();
     const [
       { openAmount, width, height, scaleX, scaleY, offsetX, offsetY },
-      set,
-      stop,
+      api
     ] = useSpring(() => ({
       openAmount: 0,
       offsetX: initialRect.x,
@@ -86,13 +83,15 @@ export const Window: React.FC<WindowProps> = memo(
     }));
 
     useMountEffect(() => {
-      set({
-        openAmount: 1,
-        offsetX: (window.innerWidth - width.get()) / 2,
-        offsetY: (window.innerHeight - height.get()) / 2,
-        scaleX: 1,
-        scaleY: 1,
-      }).then(() => (isOpening.current = false));
+      Promise.all(
+        api.start({
+          openAmount: 1,
+          offsetX: (window.innerWidth - width.get()) / 2,
+          offsetY: (window.innerHeight - height.get()) / 2,
+          scaleX: 1,
+          scaleY: 1,
+        })
+      ).then(() => (isOpening.current = false));
     });
 
     const { zIndex, raise, lower } = useElevatedElement(
@@ -169,7 +168,7 @@ export const Window: React.FC<WindowProps> = memo(
             close();
             cancel();
           } else {
-            set({
+            api.start({
               offsetX: getNextOffset(
                 offsetX.get(),
                 prevWidth,
@@ -196,23 +195,26 @@ export const Window: React.FC<WindowProps> = memo(
       isClosing.current = true;
 
       // stop width and height to get proper measurements below.
-      stop(["width", "height"]);
+      api.stop(["width", "height"]);
       lower();
       onRequestClose();
       resetRotation();
-      requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
         const destRect = measureSourceRect();
         if (destRect) {
           const scaleXDest = destRect.width / width.get();
           const scaleYDest = destRect.height / height.get();
 
-          set({
-            openAmount: 0,
-            offsetX: destRect.x,
-            offsetY: destRect.y,
-            scaleX: scaleXDest,
-            scaleY: scaleYDest,
-          }).then(destroyWindow);
+          await Promise.all(
+            api.start({
+              openAmount: 0,
+              offsetX: destRect.x,
+              offsetY: destRect.y,
+              scaleX: scaleXDest,
+              scaleY: scaleYDest,
+            })
+          );
+          destroyWindow()
         }
       });
     };
@@ -268,12 +270,12 @@ export const Window: React.FC<WindowProps> = memo(
             ref={contentRef}
             className={`${cn}__content`}
             style={{
-              // @ts-ignore
               opacity: contentOpacity,
               transform: rotation,
+              // @ts-expect-error
               "--project-background": backgroundColor,
               "--project-foreground": foregroundColor,
-            }}
+            } }
           >
             {content}
             <SVG.Close className={`${cn}__close`} onClick={close} />
