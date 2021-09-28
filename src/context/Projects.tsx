@@ -82,20 +82,16 @@ const getPosition = (index: number, positions: Positions): Vector3D => {
   const maxY = window.innerHeight - MARGIN - size;
 
   // move it randomly
-  const p1: Vector3D = [
-    clamp(x + random(100), MARGIN, maxX),
-    clamp(y + random(100), MARGIN, maxY),
-    z,
-  ];
+  const p1: Vector3D = [x, y, z];
 
-  Object.values(positions).forEach((p2) => {
-    if (overlap(p1, p2)) {
-      // nudge
-      const [diffX, diffY] = getDiff(p1, p2);
-      p1[0] = clamp(x + diffX, MARGIN, maxX);
-      p1[1] = clamp(y + diffY, MARGIN, maxY);
-    }
-  });
+  // Object.values(positions).forEach((p2) => {
+  //   if (overlap(p1, p2)) {
+  //     // nudge
+  //     const [diffX, diffY] = getDiff(p1, p2);
+  //     p1[0] = clamp(x + diffX, MARGIN, maxX);
+  //     p1[1] = clamp(y + diffY, MARGIN, maxY);
+  //   }
+  // });
 
   return p1;
 };

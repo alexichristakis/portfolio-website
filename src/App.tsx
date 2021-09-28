@@ -7,7 +7,7 @@ import {
   CursorStateProvider,
   ElevationManagerProvider,
 } from "./context";
-import { ProjectIcons, Cursor } from "./components";
+import { ProjectIcons, Projects, Cursor } from "./components";
 import { PROJECT_SIZE, ICON_BORDER_RADIUS } from "./lib";
 
 import "./App.scss";
@@ -31,9 +31,10 @@ const App: React.FC = () => {
               } as CSSProperties),
             }}
           >
-            <WindowManagerProvider>
-              <ProjectIcons />
-            </WindowManagerProvider>
+            {/* <WindowManagerProvider> */}
+            {/* <ProjectIcons /> */}
+            <Projects />
+            {/* </WindowManagerProvider> */}
           </div>
           <Cursor />
         </ElevationManagerProvider>

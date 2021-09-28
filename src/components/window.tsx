@@ -47,7 +47,7 @@ export const Window: React.FC<WindowProps> = memo(
     const isClosing = useRef(false);
     const isOpening = useRef(true);
 
-    const [, measureSourceRect] = useMeasure(sourceRef, false);
+    const [, measureSourceRect] = useMeasure(sourceRef, { forceRender: false });
 
     const initialWidth = WINDOW_WIDTH;
     const initialHeight = aspectRatio

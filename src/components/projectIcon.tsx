@@ -23,9 +23,10 @@ const INITIAL_SCALE = 1;
 
 interface ProjectIconProps {
   id: string;
+  index: number;
 }
 
-export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
+export const ProjectIcon: React.FC<ProjectIconProps> = ({ id, index }) => {
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -36,20 +37,21 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
     [initialX, initialY, initialZoom],
   ] = useProject(id);
 
-  const [{ height: contentHeight }] = useMeasure(contentRef);
+  const [{ height: contentHeight }] = useMeasure(contentRef, {
+    ignoreTransform: true,
+  });
 
   const [{ xy, scroll, zoom, scale, visible }, set] = useSpring(() => ({
     xy: [0, 0],
     scroll: 0,
-    zoom: 0,
+    zoom: -INITIAL_SCALE,
     scale: INITIAL_SCALE,
     visible: true,
   }));
 
   const { zIndex, raise } = useElevatedElement(ElevatedElementTier.ICON);
-
   useMountEffect(() => {
-    set({ zoom: initialZoom });
+    set({ zoom: initialZoom, delay: index * 100 });
   });
 
   const { sourceRef, openWindow } = useWindows({
@@ -64,12 +66,6 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
       },
     },
   });
-
-  const handleOnClick = () => {
-    if (!isDragSession.current) {
-      openWindow();
-    }
-  };
 
   const position = xy.to((x, y) => [x + initialX, y + initialY]);
 
@@ -88,6 +84,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
         } else {
           raise();
           setIsHovered(true);
+
           set({ scroll: minScroll, scale: HOVER_SCALE });
         }
 
@@ -106,13 +103,13 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
       },
       onMouseDown: () => {
         set({ scale: CLICK_SCALE });
-        isDragSession.current = false;
       },
-      onMouseUp: ({ dragging }) => {
+      onMouseUp: () => {
         set({ scale: HOVER_SCALE });
-        if (!dragging) {
-          handleOnClick();
+        if (!isDragSession.current) {
+          openWindow();
         }
+        isDragSession.current = false;
       },
     },
     {
@@ -127,9 +124,7 @@ export const ProjectIcon: React.FC<ProjectIconProps> = ({ id }) => {
       onPinch: ({ velocities: [vd], cancel, canceled }) => {
         if (canceled) return;
 
-        const prevZoom = zoom.get();
-        const nextZoom = clamp(prevZoom + vd / 10, -0.5, 0.25);
-
+        const nextZoom = clamp(zoom.get() + vd / 10, -0.5, 0.25);
         if (nextZoom === 0.25) {
           openWindow();
           cancel();
@@ -202,8 +197,8 @@ export const ProjectIcons: React.FC = () => {
   const { projectIds } = useContext(ProjectContext);
   return (
     <>
-      {projectIds.map((id) => (
-        <ProjectIcon key={id} id={id} />
+      {projectIds.map((id, index) => (
+        <ProjectIcon key={id} id={id} index={index} />
       ))}
     </>
   );
